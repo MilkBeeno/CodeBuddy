@@ -1,0 +1,16 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/hulinchun/StudioProjects/CodeBuddy/base/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14254936369803709257.xml:2:13-83
+INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/base/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14254936369803709257.xml:2:13-83
+	package
+		INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/base/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14254936369803709257.xml
+	xmlns:android
+		ADDED from /Users/hulinchun/StudioProjects/CodeBuddy/base/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14254936369803709257.xml:2:23-81
+uses-sdk
+INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/base/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14254936369803709257.xml reason: use-sdk injection requested
+INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/base/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14254936369803709257.xml
+INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/base/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14254936369803709257.xml
+	android:targetSdkVersion
+		INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/base/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14254936369803709257.xml
+	android:minSdkVersion
+		INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/base/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14254936369803709257.xml

@@ -1,0 +1,51 @@
+package com.milk.codebuddy.main.ui.components
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+
+enum class MainTab(
+    val title: String,
+    val icon: ImageVector
+) {
+    HOME("首页", Icons.Filled.Home),
+    MESSAGE("消息", Icons.Filled.MailOutline),
+    PLAY("娱乐", Icons.Filled.PlayArrow),
+    MINE("我的", Icons.Filled.Person)
+}
+
+@Composable
+fun BottomNavigation(
+    selectedTab: MainTab,
+    onTabSelected: (MainTab) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    NavigationBar(
+        modifier = modifier
+    ) {
+        MainTab.entries.forEach { tab ->
+            NavigationBarItem(
+                selected = selectedTab == tab,
+                onClick = { onTabSelected(tab) },
+                icon = {
+                    Icon(
+                        imageVector = tab.icon,
+                        contentDescription = tab.title
+                    )
+                },
+                label = {
+                    Text(text = tab.title)
+                }
+            )
+        }
+    }
+}

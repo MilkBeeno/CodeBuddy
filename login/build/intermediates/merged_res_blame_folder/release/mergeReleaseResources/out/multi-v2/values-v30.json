@@ -1,0 +1,34 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.milk.codebuddy.login-mergeReleaseResources-37:/values-v30/values-v30.xml",
+            "map": [
+                {
+                    "source": "/Users/hulinchun/.gradle/caches/9.1.0/transforms/1e9504c6bb64bc74f01c6766702616f7/transformed/material3-release/res/values-v30/values-v30.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "72",
+                        "endOffsets": "123"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "com.milk.codebuddy.login-release-39:/values-v30/values-v30.xml",
+            "map": [
+                {
+                    "source": "/Users/hulinchun/.gradle/caches/9.1.0/transforms/1e9504c6bb64bc74f01c6766702616f7/transformed/material3-release/res/values-v30/values-v30.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "72",
+                        "endOffsets": "123"
+                    }
+                }
+            ]
+        }
+    ]
+}
