@@ -9,8 +9,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.milk.codebuddy.base.ui.theme.LocalTypography
+import com.milk.codebuddy.resource.R
 
 @Composable
 fun MineScreen(
@@ -25,11 +27,11 @@ fun MineScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "我的",
+                text = stringResource(R.string.main_mine_title),
                 style = LocalTypography.current.headlineMedium
             )
             Text(
-                text = "个人信息中心",
+                text = stringResource(R.string.main_mine_subtitle),
                 style = LocalTypography.current.bodyLarge,
                 modifier = Modifier.padding(top = 16.dp)
             )

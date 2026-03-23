@@ -9,8 +9,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.milk.codebuddy.base.ui.theme.LocalTypography
+import com.milk.codebuddy.resource.R
 
 @Composable
 fun PlayScreen(
@@ -25,11 +27,11 @@ fun PlayScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "战绩",
+                text = stringResource(R.string.main_play_title),
                 style = LocalTypography.current.headlineMedium
             )
             Text(
-                text = "查看投资战绩",
+                text = stringResource(R.string.main_play_subtitle),
                 style = LocalTypography.current.bodyLarge,
                 modifier = Modifier.padding(top = 16.dp)
             )

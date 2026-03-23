@@ -16,9 +16,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.milk.codebuddy.resource.R
 
 @Composable
 fun CountdownButton(
@@ -38,7 +40,7 @@ fun CountdownButton(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "跳过",
+            text = stringResource(R.string.login_splash_skip),
             color = Color.White,
             fontSize = 14.sp,
             fontWeight = FontWeight.Normal
@@ -47,7 +49,7 @@ fun CountdownButton(
         Spacer(modifier = Modifier.size(4.dp))
 
         Text(
-            text = "$remainingSeconds",
+            text = stringResource(R.string.login_splash_countdown, remainingSeconds),
             color = Color.White,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold
@@ -57,7 +59,7 @@ fun CountdownButton(
 
         Icon(
             imageVector = Icons.Default.ArrowForward,
-            contentDescription = "进入首页",
+            contentDescription = stringResource(R.string.login_splash_skip_desc),
             tint = Color.White,
             modifier = Modifier.size(16.dp)
         )

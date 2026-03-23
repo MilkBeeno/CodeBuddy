@@ -9,9 +9,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.milk.codebuddy.base.ui.theme.LocalAppColors
 import com.milk.codebuddy.base.ui.theme.LocalTypography
+import com.milk.codebuddy.resource.R
 
 @Composable
 fun MessageScreen(
@@ -26,11 +28,11 @@ fun MessageScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "分析",
+                text = stringResource(R.string.main_message_title),
                 style = LocalTypography.current.headlineMedium
             )
             Text(
-                text = "数据分析功能",
+                text = stringResource(R.string.main_message_subtitle),
                 style = LocalTypography.current.bodyLarge,
                 modifier = Modifier.padding(top = 16.dp)
             )

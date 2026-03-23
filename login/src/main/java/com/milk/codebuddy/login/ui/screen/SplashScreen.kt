@@ -17,12 +17,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.milk.codebuddy.base.ui.theme.LocalAppColors
 import com.milk.codebuddy.login.ui.components.CountdownButton
+import com.milk.codebuddy.resource.R
 
 @Composable
 fun SplashScreen(
@@ -56,14 +58,14 @@ fun SplashScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "CodeBuddy",
+                text = stringResource(R.string.login_splash_app_name),
                 fontSize = 48.sp,
                 fontWeight = FontWeight.Bold,
                 color = LocalAppColors.current.primaryTextColor
             )
 
             Text(
-                text = "股票投资，智胜未来",
+                text = stringResource(R.string.login_splash_slogan),
                 fontSize = 16.sp,
                 color = LocalAppColors.current.auxiliaryTextColor,
                 textAlign = TextAlign.Center,

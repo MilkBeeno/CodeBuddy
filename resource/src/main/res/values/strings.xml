@@ -1,3 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- ==================== App 模块 ==================== -->
     <string name="app_name">CodeBuddy</string>
+
+    <!-- ==================== Login 模块 ==================== -->
+    <!-- Splash Screen -->
+    <string name="login_splash_app_name">CodeBuddy</string>
+    <string name="login_splash_slogan">股票投资，智胜未来</string>
+    <string name="login_splash_skip">跳过</string>
+    <string name="login_splash_skip_desc">进入首页</string>
+    <string name="login_splash_countdown">%d</string>
+
+    <!-- ==================== Main 模块 ==================== -->
+    <!-- Bottom Navigation -->
+    <string name="main_tab_home">首页</string>
+    <string name="main_tab_home_desc">首页</string>
+    <string name="main_tab_message">分析</string>
+    <string name="main_tab_message_desc">分析</string>
+    <string name="main_tab_play">战绩</string>
+    <string name="main_tab_play_desc">战绩</string>
+    <string name="main_tab_mine">我的</string>
+    <string name="main_tab_mine_desc">我的</string>
+
+    <!-- Home Screen -->
+    <string name="main_home_title">首页</string>
+    <string name="main_home_welcome">欢迎来到股票应用</string>
+
+    <!-- Message Screen -->
+    <string name="main_message_title">分析</string>
+    <string name="main_message_subtitle">数据分析功能</string>
+
+    <!-- Play Screen -->
+    <string name="main_play_title">战绩</string>
+    <string name="main_play_subtitle">查看投资战绩</string>
+
+    <!-- Mine Screen -->
+    <string name="main_mine_title">我的</string>
+    <string name="main_mine_subtitle">个人信息中心</string>
 </resources>
