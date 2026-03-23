@@ -76,7 +76,7 @@ fun SplashScreen(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(
-                    top = 32.dp,
+                    top = 16.dp,
                     end = 16.dp
                 )
         )
