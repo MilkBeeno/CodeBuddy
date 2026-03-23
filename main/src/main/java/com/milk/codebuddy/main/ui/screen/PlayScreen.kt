@@ -25,11 +25,11 @@ fun PlayScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "娱乐",
+                text = "战绩",
                 style = LocalTypography.current.headlineMedium
             )
             Text(
-                text = "敬请期待",
+                text = "查看投资战绩",
                 style = LocalTypography.current.bodyLarge,
                 modifier = Modifier.padding(top = 16.dp)
             )

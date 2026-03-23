@@ -1,10 +1,10 @@
 package com.milk.codebuddy.main.ui.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -19,8 +19,8 @@ enum class MainTab(
     val icon: ImageVector
 ) {
     HOME("首页", Icons.Filled.Home),
-    MESSAGE("消息", Icons.Filled.MailOutline),
-    PLAY("娱乐", Icons.Filled.PlayArrow),
+    MESSAGE("分析", Icons.Filled.Analytics),
+    PLAY("战绩", Icons.Filled.EmojiEvents),
     MINE("我的", Icons.Filled.Person)
 }
 

@@ -26,11 +26,11 @@ fun MessageScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "消息",
+                text = "分析",
                 style = LocalTypography.current.headlineMedium
             )
             Text(
-                text = "暂无新消息",
+                text = "数据分析功能",
                 style = LocalTypography.current.bodyLarge,
                 modifier = Modifier.padding(top = 16.dp)
             )
