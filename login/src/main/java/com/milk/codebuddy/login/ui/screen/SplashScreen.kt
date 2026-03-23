@@ -28,7 +28,7 @@ import com.milk.codebuddy.resource.R
 
 @Composable
 fun SplashScreen(
-    onNavigateToHome: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var remainingSeconds by remember { mutableIntStateOf(6) }
@@ -41,7 +41,7 @@ fun SplashScreen(
             kotlinx.coroutines.delay(1000) // 每秒更新
             remainingSeconds--
         } else {
-            onNavigateToHome()
+            onNavigateToLogin()
         }
     }
 
@@ -76,7 +76,7 @@ fun SplashScreen(
         // 倒计时按钮（添加状态栏 padding）
         CountdownButton(
             remainingSeconds = remainingSeconds,
-            onSkip = onNavigateToHome,
+            onSkip = onNavigateToLogin,
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(

@@ -6,19 +6,19 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.milk.codebuddy.base.ui.navigation.LocalNavController
 import com.milk.codebuddy.base.ui.navigation.Screen
-import com.milk.codebuddy.login.ui.screen.SplashScreen
+import com.milk.codebuddy.login.ui.screen.LoginScreen
 
 /**
- * 注册 Splash Screen 路由
+ * 注册 Login Screen 路由
  */
-fun NavGraphBuilder.splashScreen() {
-    composable(Screen.Splash.route) {
+fun NavGraphBuilder.loginScreen() {
+    composable(Screen.Login.route) {
         val controller = LocalNavController.current
-        SplashScreen(
+        LoginScreen(
             modifier = Modifier.fillMaxSize(),
-            onNavigateToLogin = {
-                controller.navigate(Screen.Login.route) {
-                    popUpTo(Screen.Splash.route) { inclusive = true }
+            onLoginSuccess = {
+                controller.navigate(Screen.Main.route) {
+                    popUpTo(Screen.Login.route) { inclusive = true }
                 }
             }
         )

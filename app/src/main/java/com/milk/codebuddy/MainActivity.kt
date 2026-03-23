@@ -12,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import com.milk.codebuddy.base.ui.navigation.ProvideNavHostController
 import com.milk.codebuddy.base.ui.navigation.Screen
 import com.milk.codebuddy.base.ui.theme.AppTheme
+import com.milk.codebuddy.login.ui.navigation.loginScreen
 import com.milk.codebuddy.login.ui.navigation.splashScreen
 import com.milk.codebuddy.main.ui.navigation.addTransactionScreen
 import com.milk.codebuddy.main.ui.navigation.mainScreen
@@ -38,6 +39,7 @@ fun AppNavigation() {
             modifier = Modifier.fillMaxSize(),
             builder = {
                 splashScreen()
+                loginScreen()
                 mainScreen()
                 addTransactionScreen(
                     onBack = {
