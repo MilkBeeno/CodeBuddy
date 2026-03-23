@@ -1,6 +1,0 @@
-[
-    {
-        "merged": "com.milk.codebuddy.base-release-38:/drawable-v21/notification_action_background.xml",
-        "source": "com.milk.codebuddy.base-core-1.17.0-25:/drawable-v21/notification_action_background.xml"
-    }
-]

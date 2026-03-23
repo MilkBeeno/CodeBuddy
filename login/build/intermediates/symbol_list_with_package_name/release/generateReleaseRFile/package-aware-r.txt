@@ -1,1 +1,0 @@
-com.milk.codebuddy.login
