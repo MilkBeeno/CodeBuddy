@@ -1,16 +1,16 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14701858322665879829.xml:2:13-83
-INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14701858322665879829.xml:2:13-83
+ADDED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest7703745714407561842.xml:2:13-83
+INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest7703745714407561842.xml:2:13-83
 	package
-		INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14701858322665879829.xml
+		INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest7703745714407561842.xml
 	xmlns:android
-		ADDED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14701858322665879829.xml:2:23-81
+		ADDED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest7703745714407561842.xml:2:23-81
 uses-sdk
-INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14701858322665879829.xml reason: use-sdk injection requested
-INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14701858322665879829.xml
-INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14701858322665879829.xml
+INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest7703745714407561842.xml reason: use-sdk injection requested
+INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest7703745714407561842.xml
+INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest7703745714407561842.xml
 	android:targetSdkVersion
-		INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14701858322665879829.xml
+		INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest7703745714407561842.xml
 	android:minSdkVersion
-		INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest14701858322665879829.xml
+		INJECTED from /Users/hulinchun/StudioProjects/CodeBuddy/login/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest7703745714407561842.xml
