@@ -37,6 +37,27 @@ local.properties
 *.aar
 *.len
 *.tab
+*.tab_i
+*.at
+*.bin
+*.jar
+*.keystream
+*.kotlin_module
+
+# build 目录下所有编译产物
+/build/
+**/build/
+*.pro
+local.properties
+gradle.properties
+consumer-rules.pro
+
+# 保留必要的配置文件
+!app/proguard-rules.pro
+!base/consumer-rules.pro
+!login/consumer-rules.pro
+!main/consumer-rules.pro
+!gradle/wrapper/gradle-wrapper.properties
 
 # 临时文件
 *.log
