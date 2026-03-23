@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.milk.codebuddy.base.ui.theme.LocalAppColors
 
 enum class MainTab(
     val title: String,
@@ -30,6 +31,7 @@ fun BottomNavigation(
     modifier: Modifier = Modifier
 ) {
     NavigationBar(
+        containerColor = LocalAppColors.current.primaryBackgroundColor,
         modifier = modifier
     ) {
         MainTab.entries.forEach { tab ->
