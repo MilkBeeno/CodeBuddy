@@ -39,7 +39,7 @@ fun MainScreen(
             when (selectedTab) {
                 MainTab.HOME -> HomeScreen(
                     onAddTransactionClick = {
-                        navController?.navigate(Screen.AddTransaction.route)
+                        navController.navigate(Screen.AddTransaction.route)
                     },
                     modifier = Modifier.padding(innerPadding)
                 )
