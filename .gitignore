@@ -35,6 +35,8 @@ local.properties
 *.dex
 *.class
 *.aar
+*.len
+*.tab
 
 # 临时文件
 *.log
