@@ -13,6 +13,7 @@ import com.milk.codebuddy.base.ui.navigation.ProvideNavHostController
 import com.milk.codebuddy.base.ui.navigation.Screen
 import com.milk.codebuddy.base.ui.theme.AppTheme
 import com.milk.codebuddy.login.ui.navigation.splashScreen
+import com.milk.codebuddy.main.ui.navigation.addTransactionScreen
 import com.milk.codebuddy.main.ui.navigation.mainScreen
 
 class MainActivity : ComponentActivity() {
@@ -38,6 +39,11 @@ fun AppNavigation() {
             builder = {
                 splashScreen()
                 mainScreen()
+                addTransactionScreen(
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
             }
         )
     }

@@ -37,4 +37,10 @@
     <!-- Mine Screen -->
     <string name="main_mine_title">我的</string>
     <string name="main_mine_subtitle">个人信息中心</string>
+
+    <!-- Floating Button -->
+    <string name="main_floating_button_desc">添加交易单</string>
+
+    <!-- Add Transaction Screen -->
+    <string name="main_add_transaction_title">添加交易单</string>
 </resources>

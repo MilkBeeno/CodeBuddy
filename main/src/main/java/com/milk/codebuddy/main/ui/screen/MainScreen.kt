@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.milk.codebuddy.base.ui.navigation.LocalNavController
+import com.milk.codebuddy.base.ui.navigation.Screen
 import com.milk.codebuddy.base.ui.theme.AppTheme
 import com.milk.codebuddy.base.ui.theme.LocalAppColors
 import com.milk.codebuddy.main.ui.components.BottomNavigation
@@ -20,6 +21,7 @@ import com.milk.codebuddy.main.ui.components.MainTab
 fun MainScreen(
     modifier: Modifier = Modifier
 ) {
+    val navController = LocalNavController.current
     var selectedTab by remember { mutableStateOf(MainTab.HOME) }
 
     AppTheme {
@@ -36,6 +38,9 @@ fun MainScreen(
         ) { innerPadding ->
             when (selectedTab) {
                 MainTab.HOME -> HomeScreen(
+                    onAddTransactionClick = {
+                        navController?.navigate(Screen.AddTransaction.route)
+                    },
                     modifier = Modifier.padding(innerPadding)
                 )
                 MainTab.MESSAGE -> MessageScreen(
@@ -51,3 +56,4 @@ fun MainScreen(
         }
     }
 }
+

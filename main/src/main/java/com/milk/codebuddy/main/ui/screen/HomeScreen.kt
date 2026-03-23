@@ -12,10 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.milk.codebuddy.base.ui.theme.LocalTypography
+import com.milk.codebuddy.main.ui.components.FloatingActionBall
 import com.milk.codebuddy.resource.R
 
 @Composable
 fun HomeScreen(
+    onAddTransactionClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -36,5 +38,13 @@ fun HomeScreen(
                 modifier = Modifier.padding(top = 16.dp)
             )
         }
+
+        // 悬浮球
+        FloatingActionBall(
+            onClick = onAddTransactionClick,
+            modifier = Modifier.align(Alignment.BottomEnd)
+                .padding(16.dp)
+        )
     }
 }
+
