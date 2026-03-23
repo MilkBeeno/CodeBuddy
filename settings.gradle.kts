@@ -27,4 +27,5 @@ include(":app")
 include(":base")
 include(":main")
 include(":login")
+include(":resource")
  

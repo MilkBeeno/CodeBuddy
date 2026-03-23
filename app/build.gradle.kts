@@ -38,6 +38,7 @@ dependencies {
     implementation(project(":base"))
     implementation(project(":main"))
     implementation(project(":login"))
+    implementation(project(":resource"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
