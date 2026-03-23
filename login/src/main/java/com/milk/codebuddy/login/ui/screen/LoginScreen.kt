@@ -1,6 +1,8 @@
 package com.milk.codebuddy.login.ui.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -48,14 +50,19 @@ fun LoginScreen(
     var accountError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .background(LocalAppColors.current.primaryBackgroundColor)
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
         // 标题
         Text(
             text = stringResource(R.string.login_title),
@@ -258,5 +265,6 @@ fun LoginScreen(
             style = LocalTypography.current.bodySmall,
             color = LocalAppColors.current.secondaryTextColor
         )
+        }
     }
 }
