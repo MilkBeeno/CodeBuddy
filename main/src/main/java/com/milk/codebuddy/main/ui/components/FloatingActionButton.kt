@@ -3,6 +3,7 @@ package com.milk.codebuddy.main.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -11,8 +12,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatOffsetStateOf
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -20,72 +20,69 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.input.pointer.awaitFirstDown
-import androidx.compose.ui.input.pointer.waitForUpOrCancellation
-import androidx.compose.ui.input.pointer.awaitEachGesture
 import com.milk.codebuddy.base.ui.theme.LocalAppColors
 import com.milk.codebuddy.resource.R
 import kotlin.math.roundToInt
+import kotlin.math.sqrt
 
 @Composable
 fun FloatingActionBall(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var offsetX by remember { mutableFloatOffsetStateOf(0f, 0f) }
-    var isDragging by remember { mutableStateOf(false) }
-    var screenWidth by remember { mutableStateOf(0f) }
-    var screenHeight by remember { mutableStateOf(0f) }
-    var ballSize by remember { mutableStateOf(56f) }
+    var offsetX by remember { mutableFloatStateOf(0f) }
+    var offsetY by remember { mutableFloatStateOf(0f) }
+    var screenWidth by remember { mutableFloatStateOf(0f) }
+    var screenHeight by remember { mutableFloatStateOf(0f) }
+    var ballSize by remember { mutableFloatStateOf(56f) }
+    var totalDragDistance by remember { mutableFloatStateOf(0f) }
 
     Box(
-        modifier = modifier.onGloballyPositioned { coordinates ->
-            screenWidth = coordinates.size.width.toFloat()
-            screenHeight = coordinates.size.height.toFloat()
-        }
+        modifier = modifier
+            .fillMaxSize()
+            .onGloballyPositioned { coordinates ->
+                screenWidth = coordinates.size.width.toFloat()
+                screenHeight = coordinates.size.height.toFloat()
+            }
     ) {
         Box(
             modifier = Modifier
-                .offset { IntOffset(offsetX.x.roundToInt(), offsetY.y.roundToInt()) }
+                .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
                 .onGloballyPositioned { coordinates ->
                     ballSize = coordinates.size.width.toFloat()
                 }
                 .pointerInput(Unit) {
                     detectDragGestures(
-                        onDragStart = { isDragging = true },
-                        onDragEnd = {
-                            isDragging = false
-                            val centerX = offsetX.x + ballSize / 2
-                            if (centerX < screenWidth / 2) {
-                                offsetX.x = 0f
-                            } else {
-                                offsetX.x = screenWidth - ballSize
-                            }
-                        }
-                    ) { change, dragAmount ->
-                        change.consume()
-                        offsetX += dragAmount
-                        if (offsetX.x < 0) offsetX.x = 0f
-                        if (offsetX.x > screenWidth - ballSize) offsetX.x = screenWidth - ballSize
-                        if (offsetX.y < 0) offsetY.y = 0f
-                        if (offsetY.y > screenHeight - ballSize) offsetY.y = screenHeight - ballSize
-                    }
-                }
-                .pointerInput(onClick) {
-                    detectDragGestures(
-                        onDragStart = { },
-                        onDrag = { change, _ ->
+                        onDragStart = {
+                            totalDragDistance = 0f
+                        },
+                        onDrag = { change, dragAmount ->
                             change.consume()
-                            isDragging = true
+                            totalDragDistance += sqrt(dragAmount.x * dragAmount.x + dragAmount.y * dragAmount.y)
+                            offsetX += dragAmount.x
+                            offsetY += dragAmount.y
+                            
+                            // 限制拖拽范围
+                            offsetX = offsetX.coerceIn(0f, screenWidth - ballSize)
+                            offsetY = offsetY.coerceIn(0f, screenHeight - ballSize)
                         },
                         onDragEnd = {
-                            isDragging = false
+                            // 吸附到屏幕边缘
+                            val centerX = offsetX + ballSize / 2
+                            if (centerX < screenWidth / 2) {
+                                offsetX = 0f
+                            } else {
+                                offsetX = screenWidth - ballSize
+                            }
+                            
+                            // 如果拖拽距离很小，视为点击
+                            if (totalDragDistance < 10f) {
+                                onClick()
+                            }
                         }
                     )
                 }
@@ -109,20 +106,5 @@ fun FloatingActionBall(
                 modifier = Modifier.size(28.dp)
             )
         }
-
-        Box(
-            modifier = Modifier
-                .offset { IntOffset(offsetX.x.roundToInt(), offsetY.y.roundToInt()) }
-                .size(56.dp)
-                .pointerInput(onClick) {
-                    awaitEachGesture {
-                        val down = awaitFirstDown()
-                        val up = waitForUpOrCancellation()
-                        if (up != null && !isDragging) {
-                            onClick()
-                        }
-                    }
-                }
-        )
     }
 }
