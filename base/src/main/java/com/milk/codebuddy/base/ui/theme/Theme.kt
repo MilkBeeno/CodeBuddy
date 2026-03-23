@@ -6,12 +6,9 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.view.WindowInsetsCompat
 
 // 本地主题颜色
 val LocalAppColors = staticCompositionLocalOf<AppColors> {
@@ -21,20 +18,20 @@ val LocalAppColors = staticCompositionLocalOf<AppColors> {
 // 亮色主题应用颜色
 internal val LightAppColors = AppColors(
     primaryTextColor = Color_000000,
-    secondlyTextColor = Color_666666,
+    secondaryTextColor = Color_666666,
     auxiliaryTextColor = Color_999999,
     primaryBackgroundColor = Color_FFFFFF,
-    secondlyBackgroundColor = Color_F5F5F5,
+    secondaryBackgroundColor = Color_F5F5F5,
     auxiliaryBackgroundColor = Color_E0E0E0
 )
 
 // 暗色主题应用颜色
 internal val DarkAppColors = AppColors(
     primaryTextColor = Color_FFFFFF,
-    secondlyTextColor = Color_999999,
+    secondaryTextColor = Color_999999,
     auxiliaryTextColor = Color_666666,
     primaryBackgroundColor = Color_121212,
-    secondlyBackgroundColor = Color_1E1E1E,
+    secondaryBackgroundColor = Color_1E1E1E,
     auxiliaryBackgroundColor = Color_2D2D2D
 )
 

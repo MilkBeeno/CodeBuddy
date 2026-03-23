@@ -19,9 +19,9 @@ val Color_018786 = Color(0xFF018786)
 // 主题颜色组
 data class AppColors(
     val primaryTextColor: Color,
-    val secondlyTextColor: Color,
+    val secondaryTextColor: Color,
     val auxiliaryTextColor: Color,
     val primaryBackgroundColor: Color,
-    val secondlyBackgroundColor: Color,
+    val secondaryBackgroundColor: Color,
     val auxiliaryBackgroundColor: Color
 )

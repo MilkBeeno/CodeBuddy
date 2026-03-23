@@ -43,4 +43,23 @@
 
     <!-- Add Transaction Screen -->
     <string name="main_add_transaction_title">添加交易单</string>
+    <string name="main_stock_name">股票名称</string>
+    <string name="main_stock_name_hint">请输入股票名称</string>
+    <string name="main_industry_tag">行业标签</string>
+    <string name="main_industry_tag_hint">请输入行业标签</string>
+    <string name="main_hot_topic">热点题材</string>
+    <string name="main_hot_topic_hint">请输入热点题材</string>
+    <string name="main_buy_price">买入价</string>
+    <string name="main_buy_price_hint">请输入买入价格</string>
+    <string name="main_stop_loss">止损价格</string>
+    <string name="main_stop_loss_hint">请输入止损价格</string>
+    <string name="main_take_profit">止盈价格</string>
+    <string name="main_take_profit_hint">请输入止盈价格</string>
+    <string name="main_add_condition">加仓条件</string>
+    <string name="main_add_condition_hint">请输入加仓条件</string>
+    <string name="main_reduce_condition">减仓条件</string>
+    <string name="main_reduce_condition_hint">请输入减仓条件</string>
+    <string name="main_buy_reason">买入理由</string>
+    <string name="main_buy_reason_hint">请输入买入理由</string>
+    <string name="main_submit">提交</string>
 </resources>
