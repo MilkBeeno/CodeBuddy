@@ -1,15 +1,19 @@
 package com.milk.codebuddy.main.ui.screen
 
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import com.milk.codebuddy.base.ui.navigation.LocalNavController
 import com.milk.codebuddy.base.ui.navigation.Screen
 import com.milk.codebuddy.base.ui.theme.AppTheme
@@ -22,7 +26,7 @@ fun MainScreen(
     modifier: Modifier = Modifier
 ) {
     val navController = LocalNavController.current
-    var selectedTab by remember { mutableStateOf(MainTab.HOME) }
+    var selectedTab by rememberSaveable { mutableStateOf(MainTab.HOME) }
 
     AppTheme {
         Scaffold(
@@ -34,7 +38,7 @@ fun MainScreen(
             },
             modifier = modifier,
             containerColor = LocalAppColors.current.primaryBackgroundColor,
-            contentWindowInsets = WindowInsets(0.dp)
+            contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
         ) { innerPadding ->
             when (selectedTab) {
                 MainTab.HOME -> HomeScreen(
@@ -54,6 +58,15 @@ fun MainScreen(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true, name = "Light Mode")
+@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES, name = "Dark Mode")
+@Composable
+fun MainScreenPreview() {
+    AppTheme {
+        MainScreen(modifier = Modifier.fillMaxSize())
     }
 }
 

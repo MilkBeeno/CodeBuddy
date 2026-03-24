@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +31,7 @@ fun SplashScreen(
     onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var remainingSeconds by remember { mutableIntStateOf(6) }
+    var remainingSeconds by rememberSaveable { mutableIntStateOf(6) }
     val density = LocalDensity.current
     val statusBarHeight = WindowInsets.statusBars.getTop(density)
 

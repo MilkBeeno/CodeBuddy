@@ -10,45 +10,34 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.milk.codebuddy.base.ui.theme.AppTheme
 import com.milk.codebuddy.base.ui.theme.LocalAppColors
 import com.milk.codebuddy.base.ui.theme.LocalTypography
+import com.milk.codebuddy.login.ui.components.LoginTextField
+import com.milk.codebuddy.login.ui.viewmodel.LoginViewModel
 import com.milk.codebuddy.resource.R
 
 @Composable
 fun LoginScreen(
+    viewModel: LoginViewModel = viewModel(),
     onLoginSuccess: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var account by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
-    var accountError by remember { mutableStateOf<String?>(null) }
-    var passwordError by remember { mutableStateOf<String?>(null) }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Box(
         modifier = modifier
@@ -81,111 +70,32 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(48.dp))
 
         // 账号输入框
-        OutlinedTextField(
-            value = account,
-            onValueChange = {
-                account = it
-                accountError = null
-            },
-            label = {
-                Text(
-                    text = stringResource(R.string.login_account),
-                    style = LocalTypography.current.bodyMedium
-                )
-            },
-            placeholder = {
-                Text(
-                    text = stringResource(R.string.login_account_hint),
-                    style = LocalTypography.current.bodySmall
-                )
-            },
-            isError = accountError != null,
-            supportingText = {
-                accountError?.let {
-                    Text(
-                        text = it,
-                        style = LocalTypography.current.bodySmall
-                    )
-                }
-            },
+        LoginTextField(
+            value = uiState.account,
+            onValueChange = viewModel::onAccountChange,
+            label = stringResource(R.string.login_account),
+            placeholder = stringResource(R.string.login_account_hint),
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = LocalAppColors.current.primaryTextColor,
-                unfocusedTextColor = LocalAppColors.current.primaryTextColor,
-                focusedBorderColor = LocalAppColors.current.primaryTextColor,
-                unfocusedBorderColor = LocalAppColors.current.secondaryTextColor,
-                errorBorderColor = androidx.compose.ui.graphics.Color.Red,
-                errorTextColor = androidx.compose.ui.graphics.Color.Red,
-                errorSupportingTextColor = androidx.compose.ui.graphics.Color.Red,
-                focusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                unfocusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                cursorColor = LocalAppColors.current.primaryTextColor,
-                focusedLabelColor = LocalAppColors.current.primaryTextColor,
-                unfocusedLabelColor = LocalAppColors.current.secondaryTextColor,
-                errorLabelColor = androidx.compose.ui.graphics.Color.Red
-            )
+            isError = uiState.accountError != null,
+            errorMessage = uiState.accountError,
+            keyboardType = KeyboardType.Email
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // 密码输入框
-        OutlinedTextField(
-            value = password,
-            onValueChange = {
-                password = it
-                passwordError = null
-            },
-            label = {
-                Text(
-                    text = stringResource(R.string.login_password),
-                    style = LocalTypography.current.bodyMedium
-                )
-            },
-            placeholder = {
-                Text(
-                    text = stringResource(R.string.login_password_hint),
-                    style = LocalTypography.current.bodySmall
-                )
-            },
-            isError = passwordError != null,
-            supportingText = {
-                passwordError?.let {
-                    Text(
-                        text = it,
-                        style = LocalTypography.current.bodySmall
-                    )
-                }
-            },
-            trailingIcon = {
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(
-                        imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = if (passwordVisible) "隐藏密码" else "显示密码",
-                        tint = LocalAppColors.current.secondaryTextColor
-                    )
-                }
-            },
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        LoginTextField(
+            value = uiState.password,
+            onValueChange = viewModel::onPasswordChange,
+            label = stringResource(R.string.login_password),
+            placeholder = stringResource(R.string.login_password_hint),
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = LocalAppColors.current.primaryTextColor,
-                unfocusedTextColor = LocalAppColors.current.primaryTextColor,
-                focusedBorderColor = LocalAppColors.current.primaryTextColor,
-                unfocusedBorderColor = LocalAppColors.current.secondaryTextColor,
-                errorBorderColor = androidx.compose.ui.graphics.Color.Red,
-                errorTextColor = androidx.compose.ui.graphics.Color.Red,
-                errorSupportingTextColor = androidx.compose.ui.graphics.Color.Red,
-                focusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                unfocusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                cursorColor = LocalAppColors.current.primaryTextColor,
-                focusedLabelColor = LocalAppColors.current.primaryTextColor,
-                unfocusedLabelColor = LocalAppColors.current.secondaryTextColor,
-                errorLabelColor = androidx.compose.ui.graphics.Color.Red
-            )
+            isError = uiState.passwordError != null,
+            errorMessage = uiState.passwordError,
+            keyboardType = KeyboardType.Password,
+            isPassword = true,
+            passwordVisible = uiState.passwordVisible,
+            onPasswordVisibilityToggle = viewModel::onPasswordVisibilityToggle
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -205,28 +115,12 @@ fun LoginScreen(
         // 登录按钮
         Button(
             onClick = {
-                // 验证输入
-                if (account.isBlank()) {
-                    accountError = "请输入账号"
-                    return@Button
-                }
-                if (password.isBlank()) {
-                    passwordError = "请输入密码"
-                    return@Button
-                }
-
-                // 登录逻辑
-                isLoading = true
-                // TODO: 实际登录请求
-                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                    isLoading = false
-                    onLoginSuccess()
-                }, 1000)
+                viewModel.onLoginClick(onLoginSuccess)
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
-            enabled = !isLoading,
+            enabled = !uiState.isLoading,
             colors = ButtonDefaults.buttonColors(
                 containerColor = LocalAppColors.current.primaryTextColor,
                 contentColor = LocalAppColors.current.primaryBackgroundColor,
@@ -234,7 +128,7 @@ fun LoginScreen(
             )
         ) {
             Text(
-                text = if (isLoading) "登录中..." else stringResource(R.string.login_button),
+                text = if (uiState.isLoading) "登录中..." else stringResource(R.string.login_button),
                 style = LocalTypography.current.titleMedium
             )
         }
@@ -266,5 +160,17 @@ fun LoginScreen(
             color = LocalAppColors.current.secondaryTextColor
         )
         }
+    }
+}
+
+@Preview(showBackground = true, name = "Light Mode")
+@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES, name = "Dark Mode")
+@Composable
+fun LoginScreenPreview() {
+    AppTheme {
+        LoginScreen(
+            onLoginSuccess = {},
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }
