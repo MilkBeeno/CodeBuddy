@@ -9,7 +9,7 @@
 ## 📚 核心技术栈规范 (Tech Stack Standards)
 
 
-### UI 层 (Jetpack Compose)
+### 视图规范 (Jetpack Compose UI)
 
 #### 架构与状态 (State & Architecture)
 * **状态提升 (Hoisting)**：Composable 必须尽可能“无状态”。将 State 和点击事件回调（Lambdas）提升至调用者或 ViewModel。
@@ -80,7 +80,7 @@
 * **流式传递**：所有的网络结果必须包装为 `NetworkResult<T>` 密封类，通过 `Flow` 逐层向上传递至 UI 层。
 
 
-### Paging3 组件 (Paging3 components)
+### 分页组件 (Paging3 components)
 
 #### 数据源层 (PagingSource & Mediator)
 * **单源加载**：仅使用网络时，必须继承 `PagingSource` 并正确实现 `getRefreshKey` 和 `load` 函数。
