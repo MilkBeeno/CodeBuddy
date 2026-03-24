@@ -8,6 +8,22 @@
 
 ## 📚 核心技术栈规范 (Tech Stack Standards)
 
+### 命名与编码规范 (Coding Standards)
+
+#### 常量命名规范 (Const Naming)
+* **强制大写**：所有使用 `const val` 修饰的编译期常量必须采用 `SCREAMING_SNAKE_CASE`。严禁出现小写字母。
+* **禁止写法**：`const val Splash = "..."` 或 `const val splash_screen = "..."`。
+* **正确写法**：`const val SPLASH_SCREEN_ROUTE = "..."` 或 `const val TIMEOUT_MS = 3000L`。
+
+#### 类与变量命名
+* **类与对象**：必须使用 `PascalCase`（大驼峰），如 `LoginViewModel`。
+* **函数与局部变量**：必须使用 `camelCase`（小驼峰），如 `fetchUserData()`。
+* **Compose 组件**：作为 UI 声明，Composable 函数必须使用 `PascalCase`，且应为名词。
+
+#### 静态扫描与 Lint
+* **强制检查**：在提交代码前，必须扫描是否存在 `ConstPropertyName`、`VariableNaming` 等 Detekt 或 Lint 警告。
+* **资源命名**：`res` 目录下的 XML 文件、图片、Layout 必须统一使用 `snake_case`（下划线小写），如 `ic_back_button.xml`。
+
 
 ### 视图规范 (Jetpack Compose UI)
 
@@ -118,48 +134,70 @@
 
 ## 🛠️ Agent 工作流 (Workflow)
 
+**命名自动修正**：当检测到 `const val` 包含小写字母时，自动将其转换为全大写蛇形命名。
+**代码风格诊断**：
+>指令：[检查命名规范] -> 扫描当前选中的代码块，列出所有不符合 Kotlin 官方规范的变量名并给出修改建议。
+> 
+**Lint 规则生成**：
+> 为项目自动生成 `detekt.yml` 或 `ktlint` 配置文件，重点开启命名约束规则。
+>
+**重构建议**：针对复杂的魔法数字或字符串，自动建议将其提取为 `companion object` 中的 `const val`。
+
 **组件拆分器**：将复杂的嵌套 UI 自动拆分为多个小于 50 行的子 Composable 函数。
 **预览生成器**：
-    - 指令：[生成预览] -> 自动生成包含：`Light/Dark Mode`、`不同语言`、`不同屏幕尺寸` 的 `@Preview` 代码块。
+>指令：[生成预览] -> 自动生成包含：`Light/Dark Mode`、`不同语言`、`不同屏幕尺寸` 的 `@Preview` 代码块。
+> 
 **性能审计**：扫描代码中可能导致过度重组的点，并给出 `rememberUpdatedState` 或 `Lambda` 引用的优化建议。
 **动画增强**：为列表加载、页面切换自动添加 `AnimatedVisibility` 或 `Crossfade` 效果。
 
 **并发模式审计**：扫描代码中是否存在“切线程但不切回来”的问题，检查是否有 `join()` 或 `await()` 导致的阻塞。
 **响应式转换器**：
-    - 指令：[将回调转为 Flow] -> 自动生成使用 `callbackFlow { ... }` 包装旧版 SDK 监听器的逻辑。
+>指令：[将回调转为 Flow] -> 自动生成使用 `callbackFlow { ... }` 包装旧版 SDK 监听器的逻辑。
+> 
 **性能诊断**：识别冗余的 `collect` 调用，建议合并多个 `StateFlow` 以减少 UI 重组频率。
 **测试伴生**：利用 `Turbine` 库为复杂的 Flow 操作符链生成单元测试。
 
 **Schema 构建器**：输入业务需求，自动生成完整的 `Entity`、`DAO`、`Database` 以及 `TypeConverters`。
 **离线优先模版生成**：
-    - 指令：[实现离线加载] -> 自动生成：`Room DAO` -> `Retrofit Service` -> `Repository (合并 Flow 逻辑)`。
+>指令：[实现离线加载] -> 自动生成：`Room DAO` -> `Retrofit Service` -> `Repository (合并 Flow 逻辑)`。
+> 
 **平滑迁移助手**：针对数据库版本升级，自动生成 `Migration` 代码路径，并提醒用户更新版本号。
 **缓存策略优化**：检查当前代码，建议合理的过期清理逻辑或分页加载（Paging 3）集成方案。
 
 **API 定义生成**：输入 URL 和 JSON 示例，自动生成符合规范的 `ApiService` 接口和 `Data Class`。
 **拦截器链构建**：
-    - 指令：[配置拦截器] -> 自动生成：动态注入 Header、Token 校验、多 BaseUrl 切换逻辑。
+>指令：[配置拦截器] -> 自动生成：动态注入 Header、Token 校验、多 BaseUrl 切换逻辑。
+> 
 **网络层全家桶封装**：
-    - 生成一套包含 `RetrofitManager`、`NetworkResult` 和 `ExceptionHandle` 的基础库代码。
+>生成一套包含 `RetrofitManager`、`NetworkResult` 和 `ExceptionHandle` 的基础库代码。
+> 
 **安全审计**：扫描代码，防止在 Log 中打印敏感字段（如密码、身份证号），并检查 `trustAllCerts` 等安全漏洞。
 
 **分页全栈生成**：输入 API 接口，自动生成 `PagingSource` -> `Pager` -> `LazyColumn` 的完整调用链。
 **多状态 UI 自动构建**：
-    - 指令：[创建分页列表] -> 自动生成包含下拉刷新、加载更多脚部和异常重试逻辑的 Compose 代码。
+>指令：[创建分页列表] -> 自动生成包含下拉刷新、加载更多脚部和异常重试逻辑的 Compose 代码。
+> 
 **双源同步配置**：
-    - 生成带 `RemoteMediator` 的标准模板，处理网络数据覆盖本地缓存的逻辑。
+>生成带 `RemoteMediator` 的标准模板，处理网络数据覆盖本地缓存的逻辑。
+> 
 **性能诊断**：检查分页 Key 的自增逻辑，防止因 Key 重复导致的列表跳动或无限加载死循环。
 **类型安全路由生成**：输入页面名称和参数，自动生成对应的 `@Serializable` 类定义。
 **导航脚手架构建**：
-    - 指令：[创建导航图] -> 自动生成包含 `NavHost`、`composable<Route>` 以及参数提取逻辑的完整架构。
+>指令：[创建导航图] -> 自动生成包含 `NavHost`、`composable<Route>` 以及参数提取逻辑的完整架构。
+> 
 **路由拦截逻辑**：
-    - 生成带 `LaunchedEffect` 的导航监听器，用于处理“未登录自动跳转”等全局拦截场景。
+>生成带 `LaunchedEffect` 的导航监听器，用于处理“未登录自动跳转”等全局拦截场景。
+> 
 **Deep Link 适配**：为指定的路由类自动生成 `deepLinks` 配置，确保外部 URL 能准确唤起应用内部页面。
 
 ---
 
 
 ## ⚠️ 约束 (Constraints)
+
+* **零容忍警告**：在生成的代码中，严禁出现 IDE 报黄（Warning）的命名问题。
+* **语义化**：命名不仅要格式正确，更要具备明确的语义。禁止使用 `AAA`、`TEMP` 等无意义名称。
+* **上下文一致性**：如果项目中已存在特定的前缀规范（如 `KEY_`），生成的常量名必须保持前缀一致。
 
 * **严禁 Context 耦合**：Composable 内部禁止直接处理业务逻辑，Context 仅用于获取资源或启动 Activity。
 * **资源引用**：所有 String/Color/Dimension 必须使用 `stringResource()` 等引用 API。
@@ -194,6 +232,12 @@
 
 
 ## 💡 常用指令参考 (Quick Prompts)
+
+* **[修正常量命名]**：检查这段代码，把所有非大写的 `const val` 统一修复为大写蛇形命名。
+* **[重构魔法值]**：扫描这段 Compose 代码，把硬编码的字符串提取到 `object HttpConfig` 及其常量中。
+* **[资源重命名]**：我打算新增一个图标，帮我按 `type_module_function` 的规范起一个文件名。
+* **[生成 Detekt 配置]**：帮我写一段针对 `naming` 规则的 Detekt 配置，要求强制校验 `const` 属性。
+* **[代码审美提升]**：以资深架构师的视角，重构这个类的变量命名，使其更符合“代码即注释”的原则。
 
 * **[构建 Screen 骨架]**：生成一个包含 `Scaffold`、`TopAppBar` 和 `FloatingActionButton` 的标准页面。
 * **[转换 XML 为 Compose]**：我输入一段旧的 XML 布局，你帮我用声明式语法重写。
