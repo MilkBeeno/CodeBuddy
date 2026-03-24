@@ -1,11 +1,8 @@
 package com.milk.codebuddy.login.ui.components
 
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -30,7 +27,8 @@ fun LoginTextField(
     keyboardType: KeyboardType = KeyboardType.Text,
     isPassword: Boolean = false,
     passwordVisible: Boolean = false,
-    onPasswordVisibilityToggle: () -> Unit = {}
+    onPasswordVisibilityToggle: () -> Unit = {},
+    trailingContent: @Composable (() -> Unit)? = null
 ) {
     OutlinedTextField(
         value = value,
@@ -56,17 +54,7 @@ fun LoginTextField(
                 )
             }
         },
-        trailingIcon = {
-            if (isPassword) {
-                IconButton(onClick = onPasswordVisibilityToggle) {
-                    Icon(
-                        imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = if (passwordVisible) "隐藏密码" else "显示密码",
-                        tint = LocalAppColors.current.secondaryTextColor
-                    )
-                }
-            }
-        },
+        trailingIcon = trailingContent,
         visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
         modifier = modifier,
         singleLine = true,

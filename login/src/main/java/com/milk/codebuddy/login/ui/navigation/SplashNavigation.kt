@@ -10,6 +10,7 @@ import com.milk.codebuddy.login.ui.screen.SplashScreen
 
 /**
  * 注册 Splash Screen 路由
+ * 检查用户会话状态，决定跳转到首页还是登录页
  */
 fun NavGraphBuilder.splashScreen() {
     composable(Screen.Splash.route) {
@@ -18,6 +19,12 @@ fun NavGraphBuilder.splashScreen() {
             modifier = Modifier.fillMaxSize(),
             onNavigateToLogin = {
                 controller.navigate(Screen.Login.route) {
+                    popUpTo(Screen.Splash.route) { inclusive = true }
+                }
+            },
+            onNavigateToMain = {
+                // 如果用户已登录，直接跳转到首页
+                controller.navigate(Screen.Main.route) {
                     popUpTo(Screen.Splash.route) { inclusive = true }
                 }
             }

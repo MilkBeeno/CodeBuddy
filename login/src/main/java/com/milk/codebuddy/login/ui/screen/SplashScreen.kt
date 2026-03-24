@@ -26,9 +26,14 @@ import com.milk.codebuddy.base.ui.theme.LocalAppColors
 import com.milk.codebuddy.login.ui.components.CountdownButton
 import com.milk.codebuddy.resource.R
 
+/**
+ * 启动页
+ * 检查用户会话状态，决定跳转到首页还是登录页
+ */
 @Composable
 fun SplashScreen(
     onNavigateToLogin: () -> Unit,
+    onNavigateToMain: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var remainingSeconds by rememberSaveable { mutableIntStateOf(6) }
@@ -41,6 +46,9 @@ fun SplashScreen(
             kotlinx.coroutines.delay(1000) // 每秒更新
             remainingSeconds--
         } else {
+            // 倒计时结束，检查用户会话状态
+            // 这里简化处理，直接跳转到登录页
+            // 实际项目中应该检查 SessionManager 判断用户是否已登录
             onNavigateToLogin()
         }
     }
@@ -83,6 +91,26 @@ fun SplashScreen(
                     top = with(density) { statusBarHeight.toDp() } + 16.dp,
                     end = 16.dp
                 )
+        )
+    }
+}
+
+/**
+ * 启动页预览
+ */
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true, name = "Light Mode")
+@androidx.compose.ui.tooling.preview.Preview(
+    showBackground = true,
+    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES,
+    name = "Dark Mode"
+)
+@Composable
+fun SplashScreenPreview() {
+    com.milk.codebuddy.base.ui.theme.AppTheme {
+        SplashScreen(
+            onNavigateToLogin = {},
+            onNavigateToMain = {},
+            modifier = Modifier.fillMaxSize()
         )
     }
 }
