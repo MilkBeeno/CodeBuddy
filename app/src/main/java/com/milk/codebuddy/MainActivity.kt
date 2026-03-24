@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.milk.codebuddy.base.ui.navigation.ProvideNavHostController
-import com.milk.codebuddy.base.ui.navigation.Screen
+import com.milk.codebuddy.base.ui.navigation.Routes
 import com.milk.codebuddy.base.ui.theme.AppTheme
 import com.milk.codebuddy.login.ui.navigation.loginScreen
 import com.milk.codebuddy.login.ui.navigation.splashScreen
@@ -35,7 +35,7 @@ fun AppNavigation() {
     ProvideNavHostController(navController) {
         NavHost(
             navController = navController,
-            startDestination = Screen.Splash.route,
+            startDestination = Routes.Splash,
             modifier = Modifier.fillMaxSize(),
             builder = {
                 splashScreen()

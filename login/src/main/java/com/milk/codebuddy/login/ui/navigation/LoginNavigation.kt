@@ -5,20 +5,26 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.milk.codebuddy.base.ui.navigation.LocalNavController
-import com.milk.codebuddy.base.ui.navigation.Screen
+import com.milk.codebuddy.base.ui.navigation.Routes
 import com.milk.codebuddy.login.ui.screen.LoginScreen
 
 /**
  * 注册 Login Screen 路由
+ * 
+ * 技术栈规范：
+ * - 导航图拆分：根据业务模块将导航逻辑拆分为不同的扩展函数
+ * - 返回栈管理：利用 popUpTo 和 inclusive 正确处理登录跳转，防止物理返回键导致的页面错乱
+ * - 单例跳转：导航动作必须配置 launchSingleTop = true
  */
 fun NavGraphBuilder.loginScreen() {
-    composable(Screen.Login.route) {
+    composable(Routes.Login) {
         val controller = LocalNavController.current
         LoginScreen(
             modifier = Modifier.fillMaxSize(),
-            onLoginSuccess = {
-                controller.navigate(Screen.Main.route) {
-                    popUpTo(Screen.Login.route) { inclusive = true }
+            onNavigateToMain = {
+                controller.navigate(Routes.Main) {
+                    popUpTo(Routes.Login) { inclusive = true }
+                    launchSingleTop = true
                 }
             }
         )

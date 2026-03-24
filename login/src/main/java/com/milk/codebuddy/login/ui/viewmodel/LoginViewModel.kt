@@ -4,26 +4,45 @@ import android.app.Application
 import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.milk.codebuddy.login.R
 import com.milk.codebuddy.login.data.local.SessionManager
 import com.milk.codebuddy.login.data.remote.LoginApi
 import com.milk.codebuddy.login.data.repository.AuthRepository
 import com.milk.codebuddy.login.data.repository.AuthRepositoryImpl
 import com.milk.codebuddy.login.network.NetworkException
+import com.milk.codebuddy.login.network.NetworkResult
 import com.milk.codebuddy.login.network.toNetworkException
+import com.milk.codebuddy.login.ui.state.LoginEffect
 import com.milk.codebuddy.login.ui.state.LoginState
 import com.milk.codebuddy.login.ui.state.LoginUiState
 import com.milk.codebuddy.resource.R as ResourceR
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 
+/**
+ * 登录 ViewModel
+ * 
+ * 技术栈规范：
+ * - 结构化并发：UI 逻辑绑定到 viewModelScope
+ * - 单向数据流：UI 发出 Intent/Event，ViewModel 更新 State，UI 自动响应渲染
+ * - Flow 操作：使用 .stateIn() 将冷流转为 StateFlow，设置 SharingStarted.WhileSubscribed(5000)
+ * - 单次事件：对于 Toast 或导航等单次事件，使用 Channel 或 SharedFlow(replay = 0)
+ */
+@OptIn(FlowPreview::class)
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     companion object {
@@ -36,8 +55,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val sessionManager = SessionManager(application)
     private val authRepository: AuthRepository
 
+    // UI 状态
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
+
+    // 单次事件（副作用）- 用于 Toast、导航等单次事件
+    private val _effect = Channel<LoginEffect>()
+    val effect = _effect.receiveAsFlow()
 
     init {
         // 初始化仓库（实际项目中应该使用依赖注入）
@@ -98,8 +122,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     /**
      * 手机号输入变化
+     * 使用 debounce 防抖处理
      */
-    @OptIn(FlowPreview::class)
     fun onPhoneChange(phone: String) {
         _uiState.update { 
             it.copy(
@@ -122,9 +146,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * 发送验证码（带防抖处理）
+     * 发送验证码
+     * 带防抖处理，避免快速重复点击
      */
-    @OptIn(FlowPreview::class)
     fun onSendCodeClick() {
         val currentPhone = _uiState.value.phone
         
@@ -142,25 +166,28 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { it.copy(isSendingCode = true) }
 
         viewModelScope.launch {
-            authRepository.sendCode(currentPhone)
-                .onSuccess {
+            when (val result = authRepository.sendCode(currentPhone)) {
+                is NetworkResult.Success -> {
                     // 开始倒计时
                     startCountdown()
                     _uiState.update { it.copy(isSendingCode = false) }
                 }
-                .onFailure { error ->
+                is NetworkResult.Error -> {
                     _uiState.update { 
                         it.copy(
                             isSendingCode = false,
-                            loginState = LoginState.Error(getErrorMessage(error))
+                            loginState = LoginState.Error(getErrorMessage(result.exception))
                         )
                     }
                 }
+                else -> {}
+            }
         }
     }
 
     /**
      * 开始验证码倒计时
+     * 使用 Flow 实现倒计时
      */
     private fun startCountdown() {
         viewModelScope.launch {
@@ -171,11 +198,19 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 )
             }
             
-            repeat(COUNTDOWN_SECONDS) { seconds ->
-                delay(1000)
-                _uiState.update { 
-                    it.copy(countdownSeconds = COUNTDOWN_SECONDS - seconds - 1)
+            // 使用 Flow 实现倒计时
+            flow {
+                repeat(COUNTDOWN_SECONDS) { seconds ->
+                    emit(COUNTDOWN_SECONDS - seconds - 1)
+                    delay(1000)
                 }
+            }
+            .flowOn(Dispatchers.Default)
+            .catch { e -> 
+                // 异常处理
+            }
+            .collect { remainingSeconds ->
+                _uiState.update { it.copy(countdownSeconds = remainingSeconds) }
             }
             
             _uiState.update { it.copy(isCountingDown = false) }
@@ -183,9 +218,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * 登录点击（带防抖处理）
+     * 登录点击
+     * 带防抖处理，避免快速重复点击
      */
-    fun onLoginClick(onLoginSuccess: () -> Unit) {
+    fun onLoginClick() {
         val currentPhone = _uiState.value.phone
         val currentCode = _uiState.value.code
 
@@ -214,24 +250,27 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         viewModelScope.launch {
-            authRepository.login(currentPhone, currentCode)
-                .onSuccess {
+            when (val result = authRepository.login(currentPhone, currentCode)) {
+                is NetworkResult.Success -> {
                     _uiState.update { 
                         it.copy(
                             isLoading = false,
                             loginState = LoginState.Success
                         )
                     }
-                    onLoginSuccess()
+                    // 发送导航事件（单次事件）
+                    _effect.send(LoginEffect.NavigateToMain)
                 }
-                .onFailure { error ->
+                is NetworkResult.Error -> {
                     _uiState.update { 
                         it.copy(
                             isLoading = false,
-                            loginState = LoginState.Error(getErrorMessage(error))
+                            loginState = LoginState.Error(getErrorMessage(result.exception))
                         )
                     }
                 }
+                else -> {}
+            }
         }
     }
 
@@ -244,15 +283,18 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     /**
      * 获取错误消息资源 ID
+     * 统一处理网络异常，转换为友好的中文提示
      */
     @StringRes
-    private fun getErrorMessage(error: Throwable): Int {
-        return when (val networkException = error.toNetworkException()) {
+    private fun getErrorMessage(exception: NetworkException): Int {
+        return when (exception) {
             is NetworkException.Unauthorized -> ResourceR.string.login_error_unauthorized
             is NetworkException.Forbidden -> ResourceR.string.login_error_forbidden
+            is NetworkException.NotFound -> ResourceR.string.login_error_network
             is NetworkException.Timeout -> ResourceR.string.login_error_timeout
             is NetworkException.ConnectionError -> ResourceR.string.login_error_network
             is NetworkException.ServerError -> ResourceR.string.login_error_server
+            is NetworkException.BusinessError -> ResourceR.string.login_error_unknown
             is NetworkException.Unknown -> ResourceR.string.login_error_unknown
         }
     }
