@@ -19,20 +19,20 @@ import com.milk.codebuddy.login.ui.screen.SplashScreen
  * - 单例跳转：导航动作必须配置 launchSingleTop = true
  */
 fun NavGraphBuilder.splashScreen() {
-    composable(Routes.Splash) {
+    composable(Routes.SPLASH) {
         val controller = LocalNavController.current
         SplashScreen(
             modifier = Modifier.fillMaxSize(),
             onNavigateToLogin = {
-                controller.navigate(Routes.Login) {
-                    popUpTo(Routes.Splash) { inclusive = true }
+                controller.navigate(Routes.LOGIN) {
+                    popUpTo(Routes.SPLASH) { inclusive = true }
                     launchSingleTop = true
                 }
             },
             onNavigateToMain = {
                 // 如果用户已登录，直接跳转到首页
-                controller.navigate(Routes.Main) {
-                    popUpTo(Routes.Splash) { inclusive = true }
+                controller.navigate(Routes.MAIN) {
+                    popUpTo(Routes.SPLASH) { inclusive = true }
                     launchSingleTop = true
                 }
             }

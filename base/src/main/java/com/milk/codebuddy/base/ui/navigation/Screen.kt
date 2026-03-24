@@ -1,63 +1,17 @@
 package com.milk.codebuddy.base.ui.navigation
 
-import kotlinx.serialization.Serializable
-
 /**
- * 类型安全路由定义
- * 所有页面路径使用 @Serializable 注解
- */
-@Serializable
-data object SplashRoute {
-    const val route: String = "splash"
-}
-
-@Serializable
-data object LoginRoute {
-    const val route: String = "login"
-}
-
-@Serializable
-data object MainRoute {
-    const val route: String = "main"
-}
-
-@Serializable
-data class AddTransactionRoute(
-    val transactionId: String? = null
-) {
-    companion object {
-        const val route: String = "add_transaction"
-    }
-}
-
-/**
- * 路由常量（推荐使用）
+ * 路由常量
  * 便于在 Navigation Compose 中使用
+ * 
+ * 技术栈规范：
+ * - 类型安全定义：所有页面路径定义为常量
+ * - 导航图拆分：根据业务模块将导航逻辑拆分为不同的扩展函数
+ * - 常量命名规范：所有 const val 必须使用 SCREAMING_SNAKE_CASE
  */
 object Routes {
-    const val Splash = "splash"
-    const val Login = "login"
-    const val Main = "main"
-    const val AddTransaction = "add_transaction"
-}
-
-/**
- * 兼容旧版 Screen 类（已废弃，建议迁移到 Routes）
- */
-@Deprecated(
-    message = "使用 Routes 常量替代",
-    replaceWith = ReplaceWith("Routes.Splash")
-)
-sealed class Screen(val route: String) {
-    @Deprecated("使用 Routes.Splash 替代")
-    data object Splash : Screen(Routes.Splash)
-    
-    @Deprecated("使用 Routes.Login 替代")
-    data object Login : Screen(Routes.Login)
-    
-    @Deprecated("使用 Routes.Main 替代")
-    data object Main : Screen(Routes.Main)
-    
-    @Deprecated("使用 Routes.AddTransaction 替代")
-    data object AddTransaction : Screen(Routes.AddTransaction)
+    const val SPLASH = "splash"
+    const val LOGIN = "login"
+    const val MAIN = "main"
+    const val ADD_TRANSACTION = "add_transaction"
 }

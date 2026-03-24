@@ -35,7 +35,7 @@ fun AppNavigation() {
     ProvideNavHostController(navController) {
         NavHost(
             navController = navController,
-            startDestination = Routes.Splash,
+            startDestination = Routes.SPLASH,
             modifier = Modifier.fillMaxSize(),
             builder = {
                 splashScreen()

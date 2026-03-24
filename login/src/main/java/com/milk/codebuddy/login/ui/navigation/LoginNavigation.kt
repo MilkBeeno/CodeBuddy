@@ -17,13 +17,13 @@ import com.milk.codebuddy.login.ui.screen.LoginScreen
  * - 单例跳转：导航动作必须配置 launchSingleTop = true
  */
 fun NavGraphBuilder.loginScreen() {
-    composable(Routes.Login) {
+    composable(Routes.LOGIN) {
         val controller = LocalNavController.current
         LoginScreen(
             modifier = Modifier.fillMaxSize(),
             onNavigateToMain = {
-                controller.navigate(Routes.Main) {
-                    popUpTo(Routes.Login) { inclusive = true }
+                controller.navigate(Routes.MAIN) {
+                    popUpTo(Routes.LOGIN) { inclusive = true }
                     launchSingleTop = true
                 }
             }

@@ -13,7 +13,7 @@ import com.milk.codebuddy.main.ui.screen.MainScreen
  * 注册 Main Screen 路由
  */
 fun NavGraphBuilder.mainScreen() {
-    composable(Routes.Main) {
+    composable(Routes.MAIN) {
         MainScreen(
             modifier = Modifier.fillMaxSize()
         )
@@ -26,7 +26,7 @@ fun NavGraphBuilder.mainScreen() {
 fun NavGraphBuilder.addTransactionScreen(
     onBack: () -> Unit
 ) {
-    composable(Routes.AddTransaction) {
+    composable(Routes.ADD_TRANSACTION) {
         AddTransactionScreen(
             onBack = onBack,
             modifier = Modifier.fillMaxSize()
