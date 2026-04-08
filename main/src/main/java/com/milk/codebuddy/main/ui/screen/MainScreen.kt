@@ -14,8 +14,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.milk.codebuddy.base.ui.navigation.AddTransaction
 import com.milk.codebuddy.base.ui.navigation.LocalNavController
-import com.milk.codebuddy.base.ui.navigation.Routes
 import com.milk.codebuddy.base.ui.theme.AppTheme
 import com.milk.codebuddy.base.ui.theme.LocalAppColors
 import com.milk.codebuddy.main.ui.components.BottomNavigation
@@ -43,7 +43,7 @@ fun MainScreen(
             when (selectedTab) {
                 MainTab.HOME -> HomeScreen(
                     onAddTransactionClick = {
-                        navController.navigate(Routes.ADD_TRANSACTION)
+                        navController.navigate(AddTransaction)
                     },
                     modifier = Modifier.padding(innerPadding)
                 )

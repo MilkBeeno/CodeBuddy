@@ -1,8 +1,11 @@
 package com.milk.codebuddy.login.network
 
 import com.milk.codebuddy.login.data.local.SessionManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
@@ -25,18 +28,25 @@ class TokenAuthenticator(
         private const val UNAUTHORIZED_CODE = 401
     }
 
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     override fun authenticate(route: Route?, response: Response): Request? {
         // 如果不是 401 错误，或者已经重试过，则不再重试
         if (response.code != UNAUTHORIZED_CODE) {
             return null
         }
 
-        val session = runBlocking { sessionManager.userSession.first() }
+        // 同步获取会话信息
+        val session = runBlocking {
+            sessionManager.userSession.first()
+        }
         
         // 如果没有 refresh token，直接返回 null，让调用方处理
         if (session.refreshToken.isEmpty()) {
-            runBlocking { sessionManager.clearSession() }
-            onTokenRefreshFailed()
+            scope.launch {
+                sessionManager.clearSession()
+                onTokenRefreshFailed()
+            }
             return null
         }
 
@@ -44,7 +54,9 @@ class TokenAuthenticator(
         // 实际项目中应该注入 Repository 或使用依赖注入框架
         synchronized(this) {
             // 再次检查是否已经被其他请求刷新了
-            val newSession = runBlocking { sessionManager.userSession.first() }
+            val newSession = runBlocking {
+                sessionManager.userSession.first()
+            }
             if (newSession.accessToken != session.accessToken) {
                 // Token 已被刷新，使用新 token 重试
                 return response.request.newBuilder()
@@ -53,9 +65,19 @@ class TokenAuthenticator(
             }
 
             // Token 刷新失败，清除会话，通知需要重新登录
-            runBlocking { sessionManager.clearSession() }
-            onTokenRefreshFailed()
+            scope.launch {
+                sessionManager.clearSession()
+                onTokenRefreshFailed()
+            }
             return null
+        }
+    }
+
+    // 注意：在实际项目中，Authenticator 的 authenticate 方法是同步的，
+    // 所以无法完全避免 runBlocking，除非使用 OkHttp 的异步 API
+    private fun <T> runBlocking(block: suspend () -> T): T {
+        return kotlinx.coroutines.runBlocking(Dispatchers.IO) {
+            block()
         }
     }
 }

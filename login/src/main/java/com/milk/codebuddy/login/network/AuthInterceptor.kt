@@ -2,7 +2,6 @@ package com.milk.codebuddy.login.network
 
 import com.milk.codebuddy.login.data.local.SessionManager
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response
 
@@ -20,7 +19,10 @@ class AuthInterceptor(
     }
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        val session = runBlocking { sessionManager.userSession.first() }
+        // 同步获取会话信息
+        val session = runBlocking {
+            sessionManager.userSession.first()
+        }
         val request = chain.request().newBuilder()
 
         // 如果有 access token，添加到请求头
@@ -29,5 +31,13 @@ class AuthInterceptor(
         }
 
         return chain.proceed(request.build())
+    }
+
+    // 注意：在实际项目中，Interceptor 的 intercept 方法是同步的，
+    // 所以无法完全避免 runBlocking，除非使用 OkHttp 的异步 API
+    private fun <T> runBlocking(block: suspend () -> T): T {
+        return kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) {
+            block()
+        }
     }
 }

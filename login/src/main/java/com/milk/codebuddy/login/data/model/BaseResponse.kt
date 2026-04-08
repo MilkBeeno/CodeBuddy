@@ -1,5 +1,6 @@
 package com.milk.codebuddy.login.data.model
 
+import androidx.compose.runtime.Immutable
 import com.google.gson.annotations.SerializedName
 
 /**
@@ -9,7 +10,9 @@ import com.google.gson.annotations.SerializedName
  * 技术栈规范：
  * - 业务状态码：必须识别后端通用的 BaseResponse<T> 结构，并将 code != 200 转换为自定义异常
  * - 空安全：对于后端可能返回的 null 字段，必须在 Data Class 中定义为可空类型
+ * - 稳定类型：对于复杂 Data Class，建议使用 @Immutable 或 @Stable 标注
  */
+@Immutable
 data class BaseResponse<T>(
     @SerializedName("code")
     val code: Int,

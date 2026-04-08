@@ -5,7 +5,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.milk.codebuddy.base.ui.navigation.LocalNavController
-import com.milk.codebuddy.base.ui.navigation.Routes
+import com.milk.codebuddy.base.ui.navigation.Login
+import com.milk.codebuddy.base.ui.navigation.Main
+import com.milk.codebuddy.base.ui.navigation.Splash
 import com.milk.codebuddy.login.ui.screen.SplashScreen
 
 /**
@@ -19,20 +21,20 @@ import com.milk.codebuddy.login.ui.screen.SplashScreen
  * - 单例跳转：导航动作必须配置 launchSingleTop = true
  */
 fun NavGraphBuilder.splashScreen() {
-    composable(Routes.SPLASH) {
+    composable<Splash> {
         val controller = LocalNavController.current
         SplashScreen(
             modifier = Modifier.fillMaxSize(),
             onNavigateToLogin = {
-                controller.navigate(Routes.LOGIN) {
-                    popUpTo(Routes.SPLASH) { inclusive = true }
+                controller.navigate(Login) {
+                    popUpTo(Splash) { inclusive = true }
                     launchSingleTop = true
                 }
             },
             onNavigateToMain = {
                 // 如果用户已登录，直接跳转到首页
-                controller.navigate(Routes.MAIN) {
-                    popUpTo(Routes.SPLASH) { inclusive = true }
+                controller.navigate(Main) {
+                    popUpTo(Splash) { inclusive = true }
                     launchSingleTop = true
                 }
             }

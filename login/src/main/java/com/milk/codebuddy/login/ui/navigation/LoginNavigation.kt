@@ -5,7 +5,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.milk.codebuddy.base.ui.navigation.LocalNavController
-import com.milk.codebuddy.base.ui.navigation.Routes
+import com.milk.codebuddy.base.ui.navigation.Login
+import com.milk.codebuddy.base.ui.navigation.Main
 import com.milk.codebuddy.login.ui.screen.LoginScreen
 
 /**
@@ -17,13 +18,13 @@ import com.milk.codebuddy.login.ui.screen.LoginScreen
  * - 单例跳转：导航动作必须配置 launchSingleTop = true
  */
 fun NavGraphBuilder.loginScreen() {
-    composable(Routes.LOGIN) {
+    composable<Login> {
         val controller = LocalNavController.current
         LoginScreen(
             modifier = Modifier.fillMaxSize(),
             onNavigateToMain = {
-                controller.navigate(Routes.MAIN) {
-                    popUpTo(Routes.LOGIN) { inclusive = true }
+                controller.navigate(Main) {
+                    popUpTo(Login) { inclusive = true }
                     launchSingleTop = true
                 }
             }
