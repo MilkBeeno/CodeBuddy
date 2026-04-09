@@ -117,7 +117,7 @@ class AuthRepositoryImpl(
         return sessionManager.userSession
     }
 
-    override fun observeisLoggedIn(): Flow<Boolean> {
+    override fun observeIsLoggedIn(): Flow<Boolean> {
         return sessionManager.isLoggedIn()
     }
 }

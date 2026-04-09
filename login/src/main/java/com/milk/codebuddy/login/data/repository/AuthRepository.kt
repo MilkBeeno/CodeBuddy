@@ -47,5 +47,5 @@ interface AuthRepository {
     /**
      * 检查是否已登录
      */
-    fun observeisLoggedIn(): Flow<Boolean>
+    fun observeIsLoggedIn(): Flow<Boolean>
 }

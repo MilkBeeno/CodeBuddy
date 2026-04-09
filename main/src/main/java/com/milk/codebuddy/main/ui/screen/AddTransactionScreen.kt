@@ -8,9 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,15 +26,17 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.milk.codebuddy.base.ui.theme.LocalAppColors
 import com.milk.codebuddy.base.ui.theme.LocalTypography
 import com.milk.codebuddy.resource.R
+
+private val PRICE_REGEX = Regex("^\\d*\\.?\\d*$")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,15 +44,15 @@ fun AddTransactionScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var stockName by remember { mutableStateOf(TextFieldValue("")) }
-    var industryTag by remember { mutableStateOf(TextFieldValue("")) }
-    var hotTopic by remember { mutableStateOf(TextFieldValue("")) }
-    var buyPrice by remember { mutableStateOf(TextFieldValue("")) }
-    var stopLoss by remember { mutableStateOf(TextFieldValue("")) }
-    var takeProfit by remember { mutableStateOf(TextFieldValue("")) }
-    var addCondition by remember { mutableStateOf(TextFieldValue("")) }
-    var reduceCondition by remember { mutableStateOf(TextFieldValue("")) }
-    var buyReason by remember { mutableStateOf(TextFieldValue("")) }
+    var stockName by rememberSaveable { mutableStateOf("") }
+    var industryTag by rememberSaveable { mutableStateOf("") }
+    var hotTopic by rememberSaveable { mutableStateOf("") }
+    var buyPrice by rememberSaveable { mutableStateOf("") }
+    var stopLoss by rememberSaveable { mutableStateOf("") }
+    var takeProfit by rememberSaveable { mutableStateOf("") }
+    var addCondition by rememberSaveable { mutableStateOf("") }
+    var reduceCondition by rememberSaveable { mutableStateOf("") }
+    var buyReason by rememberSaveable { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -63,8 +66,8 @@ fun AddTransactionScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "返回",
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.main_back_desc),
                             tint = LocalAppColors.current.primaryTextColor
                         )
                     }
@@ -85,303 +88,80 @@ fun AddTransactionScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 股票名称
-            OutlinedTextField(
+            TransactionTextField(
                 value = stockName,
                 onValueChange = { stockName = it },
-                label = {
-                    Text(
-                        text = stringResource(R.string.main_stock_name),
-                        style = LocalTypography.current.bodyMedium
-                    )
-                },
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.main_stock_name_hint),
-                        style = LocalTypography.current.bodySmall
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedTextColor = LocalAppColors.current.primaryTextColor,
-                    focusedBorderColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedBorderColor = LocalAppColors.current.secondaryTextColor,
-                    focusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    unfocusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    cursorColor = LocalAppColors.current.primaryTextColor,
-                    focusedLabelColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedLabelColor = LocalAppColors.current.secondaryTextColor
-                )
+                labelRes = R.string.main_stock_name,
+                placeholderRes = R.string.main_stock_name_hint
             )
 
-            // 行业标签
-            OutlinedTextField(
+            TransactionTextField(
                 value = industryTag,
                 onValueChange = { industryTag = it },
-                label = {
-                    Text(
-                        text = stringResource(R.string.main_industry_tag),
-                        style = LocalTypography.current.bodyMedium
-                    )
-                },
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.main_industry_tag_hint),
-                        style = LocalTypography.current.bodySmall
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedTextColor = LocalAppColors.current.primaryTextColor,
-                    focusedBorderColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedBorderColor = LocalAppColors.current.secondaryTextColor,
-                    focusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    unfocusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    cursorColor = LocalAppColors.current.primaryTextColor,
-                    focusedLabelColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedLabelColor = LocalAppColors.current.secondaryTextColor
-                )
+                labelRes = R.string.main_industry_tag,
+                placeholderRes = R.string.main_industry_tag_hint
             )
 
-            // 热点题材
-            OutlinedTextField(
+            TransactionTextField(
                 value = hotTopic,
                 onValueChange = { hotTopic = it },
-                label = {
-                    Text(
-                        text = stringResource(R.string.main_hot_topic),
-                        style = LocalTypography.current.bodyMedium
-                    )
-                },
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.main_hot_topic_hint),
-                        style = LocalTypography.current.bodySmall
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedTextColor = LocalAppColors.current.primaryTextColor,
-                    focusedBorderColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedBorderColor = LocalAppColors.current.secondaryTextColor,
-                    focusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    unfocusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    cursorColor = LocalAppColors.current.primaryTextColor,
-                    focusedLabelColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedLabelColor = LocalAppColors.current.secondaryTextColor
-                )
+                labelRes = R.string.main_hot_topic,
+                placeholderRes = R.string.main_hot_topic_hint
             )
 
-            // 买入价
-            OutlinedTextField(
+            TransactionTextField(
                 value = buyPrice,
-                onValueChange = { 
-                    if (it.text.isEmpty() || it.text.matches(Regex("^\\d*\\.?\\d*$"))) {
-                        buyPrice = it
-                    }
-                },
-                label = {
-                    Text(
-                        text = stringResource(R.string.main_buy_price),
-                        style = LocalTypography.current.bodyMedium
-                    )
-                },
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.main_buy_price_hint),
-                        style = LocalTypography.current.bodySmall
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedTextColor = LocalAppColors.current.primaryTextColor,
-                    focusedBorderColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedBorderColor = LocalAppColors.current.secondaryTextColor,
-                    focusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    unfocusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    cursorColor = LocalAppColors.current.primaryTextColor,
-                    focusedLabelColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedLabelColor = LocalAppColors.current.secondaryTextColor
-                )
+                onValueChange = { if (it.isEmpty() || it.matches(PRICE_REGEX)) buyPrice = it },
+                labelRes = R.string.main_buy_price,
+                placeholderRes = R.string.main_buy_price_hint,
+                keyboardType = KeyboardType.Decimal
             )
 
-            // 止损价格
-            OutlinedTextField(
+            TransactionTextField(
                 value = stopLoss,
-                onValueChange = { 
-                    if (it.text.isEmpty() || it.text.matches(Regex("^\\d*\\.?\\d*$"))) {
-                        stopLoss = it
-                    }
-                },
-                label = {
-                    Text(
-                        text = stringResource(R.string.main_stop_loss),
-                        style = LocalTypography.current.bodyMedium
-                    )
-                },
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.main_stop_loss_hint),
-                        style = LocalTypography.current.bodySmall
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedTextColor = LocalAppColors.current.primaryTextColor,
-                    focusedBorderColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedBorderColor = LocalAppColors.current.secondaryTextColor,
-                    focusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    unfocusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    cursorColor = LocalAppColors.current.primaryTextColor,
-                    focusedLabelColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedLabelColor = LocalAppColors.current.secondaryTextColor
-                )
+                onValueChange = { if (it.isEmpty() || it.matches(PRICE_REGEX)) stopLoss = it },
+                labelRes = R.string.main_stop_loss,
+                placeholderRes = R.string.main_stop_loss_hint,
+                keyboardType = KeyboardType.Decimal
             )
 
-            // 止盈价格
-            OutlinedTextField(
+            TransactionTextField(
                 value = takeProfit,
-                onValueChange = { 
-                    if (it.text.isEmpty() || it.text.matches(Regex("^\\d*\\.?\\d*$"))) {
-                        takeProfit = it
-                    }
-                },
-                label = {
-                    Text(
-                        text = stringResource(R.string.main_take_profit),
-                        style = LocalTypography.current.bodyMedium
-                    )
-                },
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.main_take_profit_hint),
-                        style = LocalTypography.current.bodySmall
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedTextColor = LocalAppColors.current.primaryTextColor,
-                    focusedBorderColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedBorderColor = LocalAppColors.current.secondaryTextColor,
-                    focusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    unfocusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    cursorColor = LocalAppColors.current.primaryTextColor,
-                    focusedLabelColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedLabelColor = LocalAppColors.current.secondaryTextColor
-                )
+                onValueChange = { if (it.isEmpty() || it.matches(PRICE_REGEX)) takeProfit = it },
+                labelRes = R.string.main_take_profit,
+                placeholderRes = R.string.main_take_profit_hint,
+                keyboardType = KeyboardType.Decimal
             )
 
-            // 加仓条件
-            OutlinedTextField(
+            TransactionTextField(
                 value = addCondition,
                 onValueChange = { addCondition = it },
-                label = {
-                    Text(
-                        text = stringResource(R.string.main_add_condition),
-                        style = LocalTypography.current.bodyMedium
-                    )
-                },
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.main_add_condition_hint),
-                        style = LocalTypography.current.bodySmall
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedTextColor = LocalAppColors.current.primaryTextColor,
-                    focusedBorderColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedBorderColor = LocalAppColors.current.secondaryTextColor,
-                    focusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    unfocusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    cursorColor = LocalAppColors.current.primaryTextColor,
-                    focusedLabelColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedLabelColor = LocalAppColors.current.secondaryTextColor
-                )
+                labelRes = R.string.main_add_condition,
+                placeholderRes = R.string.main_add_condition_hint
             )
 
-            // 减仓条件
-            OutlinedTextField(
+            TransactionTextField(
                 value = reduceCondition,
                 onValueChange = { reduceCondition = it },
-                label = {
-                    Text(
-                        text = stringResource(R.string.main_reduce_condition),
-                        style = LocalTypography.current.bodyMedium
-                    )
-                },
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.main_reduce_condition_hint),
-                        style = LocalTypography.current.bodySmall
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedTextColor = LocalAppColors.current.primaryTextColor,
-                    focusedBorderColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedBorderColor = LocalAppColors.current.secondaryTextColor,
-                    focusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    unfocusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    cursorColor = LocalAppColors.current.primaryTextColor,
-                    focusedLabelColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedLabelColor = LocalAppColors.current.secondaryTextColor
-                )
+                labelRes = R.string.main_reduce_condition,
+                placeholderRes = R.string.main_reduce_condition_hint
             )
 
-            // 买入理由
-            OutlinedTextField(
+            TransactionTextField(
                 value = buyReason,
                 onValueChange = { buyReason = it },
-                label = {
-                    Text(
-                        text = stringResource(R.string.main_buy_reason),
-                        style = LocalTypography.current.bodyMedium
-                    )
-                },
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.main_buy_reason_hint),
-                        style = LocalTypography.current.bodySmall
-                    )
-                },
+                labelRes = R.string.main_buy_reason,
+                placeholderRes = R.string.main_buy_reason_hint,
+                singleLine = false,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp),
                 minLines = 4,
-                maxLines = 6,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedTextColor = LocalAppColors.current.primaryTextColor,
-                    focusedBorderColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedBorderColor = LocalAppColors.current.secondaryTextColor,
-                    focusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    unfocusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
-                    cursorColor = LocalAppColors.current.primaryTextColor,
-                    focusedLabelColor = LocalAppColors.current.primaryTextColor,
-                    unfocusedLabelColor = LocalAppColors.current.secondaryTextColor
-                )
+                maxLines = 6
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 提交按钮
             Button(
                 onClick = {
                     // TODO: 提交交易单逻辑
@@ -400,4 +180,50 @@ fun AddTransactionScreen(
             }
         }
     }
+}
+
+@Composable
+private fun TransactionTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    labelRes: Int,
+    placeholderRes: Int,
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    singleLine: Boolean = true,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    minLines: Int = 1,
+    maxLines: Int = 1
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = {
+            Text(
+                text = stringResource(labelRes),
+                style = LocalTypography.current.bodyMedium
+            )
+        },
+        placeholder = {
+            Text(
+                text = stringResource(placeholderRes),
+                style = LocalTypography.current.bodySmall
+            )
+        },
+        modifier = modifier,
+        singleLine = singleLine,
+        minLines = minLines,
+        maxLines = maxLines,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = LocalAppColors.current.primaryTextColor,
+            unfocusedTextColor = LocalAppColors.current.primaryTextColor,
+            focusedBorderColor = LocalAppColors.current.primaryTextColor,
+            unfocusedBorderColor = LocalAppColors.current.secondaryTextColor,
+            focusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
+            unfocusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
+            cursorColor = LocalAppColors.current.primaryTextColor,
+            focusedLabelColor = LocalAppColors.current.primaryTextColor,
+            unfocusedLabelColor = LocalAppColors.current.secondaryTextColor
+        )
+    )
 }

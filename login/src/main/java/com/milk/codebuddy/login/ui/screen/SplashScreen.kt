@@ -25,6 +25,10 @@ import androidx.compose.ui.unit.sp
 import com.milk.codebuddy.base.ui.theme.LocalAppColors
 import com.milk.codebuddy.login.ui.components.CountdownButton
 import com.milk.codebuddy.resource.R
+import kotlinx.coroutines.delay
+
+private const val SPLASH_COUNTDOWN_SECONDS = 6
+private const val SPLASH_TICK_DELAY_MS = 1000L
 
 /**
  * 启动页
@@ -36,18 +40,16 @@ fun SplashScreen(
     onNavigateToMain: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var remainingSeconds by rememberSaveable { mutableIntStateOf(6) }
+    var remainingSeconds by rememberSaveable { mutableIntStateOf(SPLASH_COUNTDOWN_SECONDS) }
     val density = LocalDensity.current
     val statusBarHeight = WindowInsets.statusBars.getTop(density)
 
-    // 倒计时逻辑
     LaunchedEffect(remainingSeconds) {
         if (remainingSeconds > 0) {
-            kotlinx.coroutines.delay(1000) // 每秒更新
+            delay(SPLASH_TICK_DELAY_MS)
             remainingSeconds--
         } else {
             // 倒计时结束，检查用户会话状态
-            // 这里简化处理，直接跳转到登录页
             // 实际项目中应该检查 SessionManager 判断用户是否已登录
             onNavigateToLogin()
         }
@@ -57,7 +59,6 @@ fun SplashScreen(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        // Logo 或应用名称
         Column(
             modifier = Modifier
                 .align(Alignment.Center)
@@ -81,7 +82,6 @@ fun SplashScreen(
             )
         }
 
-        // 倒计时按钮（添加状态栏 padding）
         CountdownButton(
             remainingSeconds = remainingSeconds,
             onSkip = onNavigateToLogin,

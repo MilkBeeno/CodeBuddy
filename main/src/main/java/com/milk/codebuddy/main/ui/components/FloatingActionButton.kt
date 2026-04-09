@@ -12,6 +12,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -31,19 +32,15 @@ fun FloatingActionBall(
         Box(
             modifier = Modifier
                 .size(56.dp)
-                .background(
-                    color = LocalAppColors.current.primaryTextColor,
-                    shape = CircleShape
-                )
                 .shadow(
                     elevation = 8.dp,
                     shape = CircleShape,
                     ambientColor = Color.Black.copy(alpha = 0.3f),
                     spotColor = Color.Black.copy(alpha = 0.3f)
                 )
-                .clickable(onClick = {
-                    onClick()
-                }),
+                .clip(CircleShape)
+                .background(color = LocalAppColors.current.primaryTextColor)
+                .clickable(onClick = onClick),
             contentAlignment = Alignment.Center
         ) {
             Icon(

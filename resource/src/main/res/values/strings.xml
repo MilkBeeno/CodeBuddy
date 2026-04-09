@@ -88,4 +88,5 @@
     <string name="main_buy_reason">买入理由</string>
     <string name="main_buy_reason_hint">请输入买入理由</string>
     <string name="main_submit">提交</string>
+    <string name="main_back_desc">返回</string>
 </resources>

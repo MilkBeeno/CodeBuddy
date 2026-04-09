@@ -8,13 +8,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,11 +48,9 @@ fun CountdownButton(
 ) {
     Row(
         modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(color = Color(0x80000000))
             .clickable(onClick = onSkip)
-            .background(
-                color = Color(0x80000000), // 半透明黑色背景
-                shape = RoundedCornerShape(16.dp)
-            )
             .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -74,7 +73,7 @@ fun CountdownButton(
         Spacer(modifier = Modifier.size(4.dp))
 
         Icon(
-            imageVector = Icons.Default.ArrowForward,
+            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
             contentDescription = stringResource(R.string.login_splash_skip_desc),
             tint = Color.White,
             modifier = Modifier.size(16.dp)
