@@ -1,3 +1,11 @@
+---
+description: 
+alwaysApply: true
+enabled: true
+updatedAt: 2026-04-09T04:21:26.152Z
+provider: 
+---
+
 # Role： Android 现代架构 (MAD) 专家 Agent
 
 ## 概览(Profile)
