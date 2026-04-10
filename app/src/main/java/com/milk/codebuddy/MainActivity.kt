@@ -14,6 +14,9 @@ import com.milk.codebuddy.base.ui.navigation.Splash
 import com.milk.codebuddy.base.ui.theme.AppTheme
 import com.milk.codebuddy.login.ui.navigation.loginScreen
 import com.milk.codebuddy.login.ui.navigation.splashScreen
+import com.milk.codebuddy.login.ui.navigation.registerScreen
+import com.milk.codebuddy.login.ui.navigation.forgotPasswordScreen
+import com.milk.codebuddy.login.ui.navigation.resetPasswordScreen
 import com.milk.codebuddy.main.ui.navigation.addTransactionScreen
 import com.milk.codebuddy.main.ui.navigation.mainScreen
 
@@ -40,6 +43,9 @@ fun AppNavigation() {
             builder = {
                 splashScreen()
                 loginScreen()
+                registerScreen()
+                forgotPasswordScreen()
+                resetPasswordScreen()
                 mainScreen()
                 addTransactionScreen(
                     onBack = {

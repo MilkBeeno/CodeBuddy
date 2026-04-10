@@ -14,36 +14,39 @@ import kotlinx.coroutines.flow.Flow
  */
 interface AuthRepository {
 
-    /**
-     * 发送验证码
-     * @param phone 手机号
-     */
     fun sendCode(phone: String): Flow<ApiResult<Unit>>
 
+    fun login(phone: String, code: String): Flow<ApiResult<UserSession>>
+
+    fun refreshToken(): Flow<ApiResult<UserSession>>
+
+    suspend fun logout()
+
+    fun observeUserSession(): Flow<UserSession>
+
+    fun observeIsLoggedIn(): Flow<Boolean>
+
     /**
-     * 手机号验证码登录
+     * 手机号注册（含密码）
+     * @param phone    手机号
+     * @param code     验证码
+     * @param password 密码
+     */
+    fun register(phone: String, code: String, password: String): Flow<ApiResult<Unit>>
+
+    /**
+     * 忘记密码 - 验证手机号和验证码
      * @param phone 手机号
      * @param code  验证码
      */
-    fun login(phone: String, code: String): Flow<ApiResult<UserSession>>
+    fun forgotPasswordVerify(phone: String, code: String): Flow<ApiResult<Unit>>
 
     /**
-     * 刷新 Token
+     * 重置密码
+     * @param phone           手机号
+     * @param newPassword     新密码
+     * @param confirmPassword 确认密码
      */
-    fun refreshToken(): Flow<ApiResult<UserSession>>
-
-    /**
-     * 登出：清除本地会话
-     */
-    suspend fun logout()
-
-    /**
-     * 观察当前用户会话（响应式，持续监听）
-     */
-    fun observeUserSession(): Flow<UserSession>
-
-    /**
-     * 观察登录状态（响应式，持续监听）
-     */
-    fun observeIsLoggedIn(): Flow<Boolean>
+    fun resetPassword(phone: String, newPassword: String, confirmPassword: String): Flow<ApiResult<Unit>>
 }
+

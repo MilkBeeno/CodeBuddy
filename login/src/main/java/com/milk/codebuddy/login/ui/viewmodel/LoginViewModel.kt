@@ -17,7 +17,6 @@ import com.milk.codebuddy.login.ui.state.LoginState
 import com.milk.codebuddy.login.ui.state.LoginUiState
 import com.milk.codebuddy.resource.R as ResourceR
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +39,6 @@ import java.util.regex.Pattern
  * - 单次事件：导航/Toast 通过 Channel（replay=0）发送，防止重复消费
  * - 零 try-catch：所有网络异常由 base 的 safeApiCall 内部 .catch 捕获并转为 ApiResult.Error
  */
-@OptIn(FlowPreview::class)
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     companion object {
@@ -236,6 +234,27 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                         userInfo = null
                     )
                 )
+            }
+
+            override suspend fun register(
+                request: com.milk.codebuddy.login.data.model.RegisterRequest
+            ): SendCodeResponse {
+                delay(1000)
+                return SendCodeResponse(code = 200, message = "success", data = true)
+            }
+
+            override suspend fun forgotPasswordVerify(
+                request: com.milk.codebuddy.login.data.model.ForgotPasswordVerifyRequest
+            ): SendCodeResponse {
+                delay(1000)
+                return SendCodeResponse(code = 200, message = "success", data = true)
+            }
+
+            override suspend fun resetPassword(
+                request: com.milk.codebuddy.login.data.model.ResetPasswordRequest
+            ): SendCodeResponse {
+                delay(1000)
+                return SendCodeResponse(code = 200, message = "success", data = true)
             }
         }
     }

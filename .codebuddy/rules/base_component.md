@@ -1,9 +1,9 @@
 ---
-description:
-alwaysApply: false
+description: 
+alwaysApply: true
 enabled: true
-updatedAt: 2026-04-09T04:20:41.159Z
-provider:
+updatedAt: 2026-04-10T09:03:00.971Z
+provider: 
 ---
 
 # Role：Android 公共组件

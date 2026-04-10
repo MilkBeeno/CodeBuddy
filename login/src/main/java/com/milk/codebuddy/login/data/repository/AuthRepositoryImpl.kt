@@ -3,7 +3,10 @@ package com.milk.codebuddy.login.data.repository
 import com.milk.codebuddy.base.network.ApiResult
 import com.milk.codebuddy.base.network.safeApiCall
 import com.milk.codebuddy.login.data.local.SessionManager
+import com.milk.codebuddy.login.data.model.ForgotPasswordVerifyRequest
 import com.milk.codebuddy.login.data.model.LoginRequest
+import com.milk.codebuddy.login.data.model.RegisterRequest
+import com.milk.codebuddy.login.data.model.ResetPasswordRequest
 import com.milk.codebuddy.login.data.model.SendCodeRequest
 import com.milk.codebuddy.login.data.model.UserSession
 import com.milk.codebuddy.login.data.remote.LoginApi
@@ -32,9 +35,7 @@ class AuthRepositoryImpl(
 
     override fun sendCode(phone: String): Flow<ApiResult<Unit>> = safeApiCall {
         val response = loginApi.sendCode(SendCodeRequest(phone))
-        if (response.code != SUCCESS_CODE) {
-            throw RuntimeException(response.message)
-        }
+        if (response.code != SUCCESS_CODE) throw RuntimeException(response.message)
     }
 
     override fun login(phone: String, code: String): Flow<ApiResult<UserSession>> = safeApiCall {
@@ -42,7 +43,6 @@ class AuthRepositoryImpl(
         if (response.code != SUCCESS_CODE || response.data == null) {
             throw RuntimeException(response.message)
         }
-
         val tokenData = response.data
         val userInfo = tokenData.userInfo
         val session = UserSession(
@@ -54,28 +54,23 @@ class AuthRepositoryImpl(
             avatar = userInfo?.avatar.orEmpty(),
             isLoggedIn = true
         )
-        // SSOT：网络结果先写入本地存储
         sessionManager.saveSession(session)
         session
     }
 
     override fun refreshToken(): Flow<ApiResult<UserSession>> = safeApiCall {
         val currentSession = sessionManager.userSession.first()
-
         if (currentSession.refreshToken.isEmpty()) {
             sessionManager.clearSession()
             throw RuntimeException("No refresh token, please login again")
         }
-
         val response = loginApi.refreshToken(mapOf("refresh_token" to currentSession.refreshToken))
         if (response.code != SUCCESS_CODE || response.data == null) {
             sessionManager.clearSession()
             throw RuntimeException(response.message)
         }
-
         val tokenData = response.data
         sessionManager.updateTokens(tokenData.accessToken, tokenData.refreshToken)
-
         currentSession.copy(
             accessToken = tokenData.accessToken,
             refreshToken = tokenData.refreshToken
@@ -89,4 +84,20 @@ class AuthRepositoryImpl(
     override fun observeUserSession(): Flow<UserSession> = sessionManager.userSession
 
     override fun observeIsLoggedIn(): Flow<Boolean> = sessionManager.isLoggedIn()
+
+    override fun register(phone: String, code: String, password: String): Flow<ApiResult<Unit>> = safeApiCall {
+        val response = loginApi.register(RegisterRequest(phone, code, password))
+        if (response.code != SUCCESS_CODE) throw RuntimeException(response.message)
+    }
+
+    override fun forgotPasswordVerify(phone: String, code: String): Flow<ApiResult<Unit>> = safeApiCall {
+        val response = loginApi.forgotPasswordVerify(ForgotPasswordVerifyRequest(phone, code))
+        if (response.code != SUCCESS_CODE) throw RuntimeException(response.message)
+    }
+
+    override fun resetPassword(phone: String, newPassword: String, confirmPassword: String): Flow<ApiResult<Unit>> = safeApiCall {
+        val response = loginApi.resetPassword(ResetPasswordRequest(phone, newPassword, confirmPassword))
+        if (response.code != SUCCESS_CODE) throw RuntimeException(response.message)
+    }
 }
+

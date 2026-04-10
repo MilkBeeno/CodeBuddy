@@ -16,6 +16,15 @@ object Splash
 object Login
 
 @Serializable
+object Register
+
+@Serializable
+object ForgotPassword
+
+@Serializable
+data class ResetPassword(val phone: String)
+
+@Serializable
 object Main
 
 @Serializable

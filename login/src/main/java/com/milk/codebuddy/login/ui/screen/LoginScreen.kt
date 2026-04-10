@@ -1,6 +1,7 @@
 package com.milk.codebuddy.login.ui.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,6 +54,8 @@ import com.milk.codebuddy.resource.R
 fun LoginScreen(
     viewModel: LoginViewModel = viewModel(),
     onNavigateToMain: () -> Unit,
+    onNavigateToRegister: () -> Unit = {},
+    onNavigateToForgotPassword: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -112,7 +115,10 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             // 底部信息
-            LoginFooter()
+            LoginFooter(
+                onNavigateToRegister = onNavigateToRegister,
+                onNavigateToForgotPassword = onNavigateToForgotPassword
+            )
         }
     }
 }
@@ -256,11 +262,24 @@ private fun LoginButton(
  * 登录页面底部信息
  */
 @Composable
-private fun LoginFooter() {
+private fun LoginFooter(
+    onNavigateToRegister: () -> Unit,
+    onNavigateToForgotPassword: () -> Unit
+) {
     Text(
         text = stringResource(R.string.login_register),
         style = LocalTypography.current.bodyMedium,
-        color = LocalAppColors.current.primaryTextColor
+        color = LocalAppColors.current.primaryTextColor,
+        modifier = Modifier.clickable(onClick = onNavigateToRegister)
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    Text(
+        text = stringResource(R.string.login_forgot_password),
+        style = LocalTypography.current.bodyMedium,
+        color = LocalAppColors.current.primaryTextColor,
+        modifier = Modifier.clickable(onClick = onNavigateToForgotPassword)
     )
 
     Spacer(modifier = Modifier.height(32.dp))
