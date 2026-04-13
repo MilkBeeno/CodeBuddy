@@ -3,7 +3,9 @@ package com.milk.codebuddy.login.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.milk.codebuddy.base.network.ApiResult
+import com.milk.codebuddy.base.utils.DEFAULT_COUNTDOWN_SECONDS
 import com.milk.codebuddy.base.utils.countdownFlow
+import com.milk.codebuddy.base.utils.isValidPhone
 import com.milk.codebuddy.login.data.repository.AuthRepository
 import com.milk.codebuddy.login.ui.state.LoginEffect
 import com.milk.codebuddy.login.ui.state.LoginState
@@ -16,7 +18,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.regex.Pattern
 
 /**
  * 登录 ViewModel（MVI 架构）
@@ -30,8 +31,7 @@ class LoginViewModel(
 ) : ViewModel() {
 
     companion object {
-        private const val PHONE_REGEX = "^1[3-9]\\d{9}$"
-        private const val COUNTDOWN_SECONDS = 60
+        private const val COUNTDOWN_SECONDS = DEFAULT_COUNTDOWN_SECONDS
     }
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -142,8 +142,7 @@ class LoginViewModel(
         }
     }
 
-    private fun validatePhone(phone: String): Boolean =
-        phone.isNotEmpty() && Pattern.matches(PHONE_REGEX, phone)
+    private fun validatePhone(phone: String): Boolean = phone.isValidPhone()
 
     private fun getErrorMessageRes(code: Int): Int = when (code) {
         401 -> ResourceR.string.login_error_unauthorized

@@ -234,11 +234,7 @@ private fun PhoneNumberInput(
                     value = phone,
                     onValueChange = onPhoneChange,
                     modifier = Modifier.weight(1f),
-                    textStyle = TextStyle(
-                        color = colors.primaryTextColor,
-                        fontSize = typography.bodyLarge.fontSize,
-                        fontWeight = typography.bodyLarge.fontWeight
-                    ),
+                    textStyle = typography.bodyLarge.copy(color = colors.primaryTextColor),
                     cursorBrush = SolidColor(colors.primaryTextColor),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     singleLine = true,
@@ -287,11 +283,7 @@ private fun PasswordInput(
             value = password,
             onValueChange = onPasswordChange,
             modifier = Modifier.weight(1f),
-            textStyle = TextStyle(
-                color = colors.primaryTextColor,
-                fontSize = typography.bodyLarge.fontSize,
-                fontWeight = typography.bodyLarge.fontWeight
-            ),
+            textStyle = typography.bodyLarge.copy(color = colors.primaryTextColor),
             cursorBrush = SolidColor(colors.primaryTextColor),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),

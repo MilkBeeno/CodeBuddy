@@ -26,7 +26,8 @@ internal val LightAppColors = AppColors(
     auxiliaryBackgroundColor = Color_E3E6E8,
     accentColor = Color_1F72E8,
     dividerColor = Color_E0E0E0,
-    googleRed = Color_EA4335
+    googleRed = Color_EA4335,
+    successColor = Color_4CAF50
 )
 
 // 暗色主题应用颜色
@@ -40,7 +41,8 @@ internal val DarkAppColors = AppColors(
     auxiliaryBackgroundColor = Color_2D2D2D,
     accentColor = Color_1F72E8,
     dividerColor = Color_2D2D2D,
-    googleRed = Color_EA4335
+    googleRed = Color_EA4335,
+    successColor = Color_4CAF50
 )
 
 @Composable

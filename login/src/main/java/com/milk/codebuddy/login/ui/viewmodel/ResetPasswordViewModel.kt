@@ -1,29 +1,17 @@
 package com.milk.codebuddy.login.ui.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.milk.codebuddy.base.network.ApiResult
 import com.milk.codebuddy.base.ui.navigation.ResetPassword
-import com.milk.codebuddy.login.data.local.SessionManager
-import com.milk.codebuddy.login.data.model.ForgotPasswordVerifyRequest
-import com.milk.codebuddy.login.data.model.LoginRequest
-import com.milk.codebuddy.login.data.model.LoginResponse
-import com.milk.codebuddy.login.data.model.RegisterRequest
-import com.milk.codebuddy.login.data.model.ResetPasswordRequest
-import com.milk.codebuddy.login.data.model.SendCodeRequest
-import com.milk.codebuddy.login.data.model.SendCodeResponse
-import com.milk.codebuddy.login.data.remote.LoginApi
 import com.milk.codebuddy.login.data.repository.AuthRepository
-import com.milk.codebuddy.login.data.repository.AuthRepositoryImpl
 import com.milk.codebuddy.login.ui.state.ResetPasswordEffect
 import com.milk.codebuddy.login.ui.state.ResetPasswordState
 import com.milk.codebuddy.login.ui.state.ResetPasswordUiState
 import com.milk.codebuddy.resource.R as ResourceR
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,33 +21,30 @@ import kotlinx.coroutines.launch
 
 /**
  * 重置密码 ViewModel（MVI 架构）
- * 通过 SavedStateHandle 获取导航传入的 phone 参数
+ *
+ * - 依赖通过构造器注入，由 [AuthViewModelFactory] 提供
+ * - 通过 [SavedStateHandle] 获取导航传入的 phone 参数，无需持有 Application / Context
+ *
+ * @param authRepository 认证仓库，统一处理网络请求
+ * @param savedStateHandle 导航参数持有者，从 [ResetPassword] 路由中提取 phone
  */
 class ResetPasswordViewModel(
-    application: Application,
+    private val authRepository: AuthRepository,
     savedStateHandle: SavedStateHandle
-) : AndroidViewModel(application) {
+) : ViewModel() {
 
     companion object {
         private const val PASSWORD_MIN_LENGTH = 6
         private const val PASSWORD_MAX_LENGTH = 20
     }
 
-    private val route: ResetPassword = savedStateHandle.toRoute()
-    private val phone: String = route.phone
-
-    private val sessionManager = SessionManager(application)
-    private val authRepository: AuthRepository
+    private val phone: String = savedStateHandle.toRoute<ResetPassword>().phone
 
     private val _uiState = MutableStateFlow(ResetPasswordUiState(phone = phone))
     val uiState: StateFlow<ResetPasswordUiState> = _uiState.asStateFlow()
 
     private val _effect = Channel<ResetPasswordEffect>()
     val effect = _effect.receiveAsFlow()
-
-    init {
-        authRepository = AuthRepositoryImpl(createMockLoginApi(), sessionManager)
-    }
 
     fun onNewPasswordChange(password: String) {
         _uiState.update { it.copy(newPassword = password, newPasswordError = null) }
@@ -126,33 +111,5 @@ class ResetPasswordViewModel(
         -1 -> ResourceR.string.reset_password_error_timeout
         -2, -3 -> ResourceR.string.reset_password_error_network
         else -> ResourceR.string.reset_password_error_unknown
-    }
-
-    private fun createMockLoginApi(): LoginApi = object : LoginApi {
-        override suspend fun sendCode(request: SendCodeRequest): SendCodeResponse {
-            delay(1000)
-            return SendCodeResponse(code = 200, message = "success", data = true)
-        }
-
-        override suspend fun login(request: LoginRequest): LoginResponse =
-            LoginResponse(code = 200, message = "success", data = null)
-
-        override suspend fun refreshToken(refreshToken: Map<String, String>): LoginResponse =
-            LoginResponse(code = 200, message = "success", data = null)
-
-        override suspend fun register(request: RegisterRequest): SendCodeResponse {
-            delay(1000)
-            return SendCodeResponse(code = 200, message = "success", data = true)
-        }
-
-        override suspend fun forgotPasswordVerify(request: ForgotPasswordVerifyRequest): SendCodeResponse {
-            delay(1000)
-            return SendCodeResponse(code = 200, message = "success", data = true)
-        }
-
-        override suspend fun resetPassword(request: ResetPasswordRequest): SendCodeResponse {
-            delay(1000)
-            return SendCodeResponse(code = 200, message = "success", data = true)
-        }
     }
 }

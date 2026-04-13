@@ -1,112 +1,90 @@
 package com.milk.codebuddy.login.data.local
 
-import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
+import com.milk.codebuddy.base.datastore.AppPreferences
+import com.milk.codebuddy.base.datastore.AppPreferencesKeys
 import com.milk.codebuddy.login.data.model.UserSession
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.Dispatchers
-import java.io.IOException
-
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_session")
 
 /**
  * 会话管理器
- * 使用 DataStore 存储用户会话信息
- * 
- * 技术栈规范：
- * - 解耦封装：DataStore 封装在 Manager 内部，通过 Flow 暴露配置项
- * - 异常处理：读取操作包含 IOException 处理逻辑
- * - 线程隔离：所有读写操作强制在 Dispatchers.IO 中执行
+ *
+ * 基于 base 模块的 [AppPreferences] 实现，提供用户会话的读写能力。
+ * 所有 Key 统一由 [AppPreferencesKeys] 管理，禁止在此处定义新 Key。
+ *
+ * 规范：
+ * - 禁止在业务模块直接访问 context.dataStore
+ * - 读写操作委托给 [AppPreferences]，不重复实现
+ *
+ * @param prefs base 模块的 [AppPreferences] 单例
  */
-class SessionManager(private val context: Context) {
-
-    companion object {
-        private val KEY_ACCESS_TOKEN = stringPreferencesKey("access_token")
-        private val KEY_REFRESH_TOKEN = stringPreferencesKey("refresh_token")
-        private val KEY_USER_ID = stringPreferencesKey("user_id")
-        private val KEY_PHONE = stringPreferencesKey("phone")
-        private val KEY_NICKNAME = stringPreferencesKey("nickname")
-        private val KEY_AVATAR = stringPreferencesKey("avatar")
-    }
+class SessionManager(private val prefs: AppPreferences) {
 
     /**
-     * 获取用户会话
-     * 使用 catch 操作符捕获 IOException 异常，防止底层存储损坏导致应用崩溃
+     * 用户会话流
+     * 读取失败（IOException）时由 [AppPreferences] 内部处理，返回空会话
      */
-    val userSession: Flow<UserSession> = context.dataStore.data
-        .catch { exception ->
-            if (exception is IOException) {
-                // 存储损坏时返回空会话
-                emit(androidx.datastore.preferences.core.emptyPreferences())
-            } else {
-                throw exception
-            }
-        }
-        .map { preferences ->
-            val accessToken = preferences[KEY_ACCESS_TOKEN].orEmpty()
-            val refreshToken = preferences[KEY_REFRESH_TOKEN].orEmpty()
-            
-            if (accessToken.isNotEmpty()) {
-                UserSession(
-                    accessToken = accessToken,
-                    refreshToken = refreshToken,
-                    userId = preferences[KEY_USER_ID].orEmpty(),
-                    phone = preferences[KEY_PHONE].orEmpty(),
-                    nickname = preferences[KEY_NICKNAME].orEmpty(),
-                    avatar = preferences[KEY_AVATAR].orEmpty(),
-                    isLoggedIn = true
-                )
-            } else {
-                UserSession.EMPTY
-            }
-        }
-        .flowOn(Dispatchers.IO)
-
-    /**
-     * 保存用户会话
-     * 在 IO 线程执行写操作
-     */
-    suspend fun saveSession(session: UserSession) {
-        context.dataStore.edit { preferences ->
-            preferences[KEY_ACCESS_TOKEN] = session.accessToken
-            preferences[KEY_REFRESH_TOKEN] = session.refreshToken
-            preferences[KEY_USER_ID] = session.userId
-            preferences[KEY_PHONE] = session.phone
-            preferences[KEY_NICKNAME] = session.nickname
-            preferences[KEY_AVATAR] = session.avatar
+    val userSession: Flow<UserSession> = combine(
+        prefs.observe(AppPreferencesKeys.ACCESS_TOKEN, ""),
+        prefs.observe(AppPreferencesKeys.REFRESH_TOKEN, ""),
+        prefs.observe(AppPreferencesKeys.USER_ID, ""),
+        prefs.observe(AppPreferencesKeys.USER_PHONE, ""),
+        prefs.observe(AppPreferencesKeys.USER_NICKNAME, ""),
+        prefs.observe(AppPreferencesKeys.USER_AVATAR, "")
+    ) { values ->
+        val accessToken = values[0]
+        val refreshToken = values[1]
+        val userId = values[2]
+        val phone = values[3]
+        val nickname = values[4]
+        val avatar = values[5]
+        if (accessToken.isNotEmpty()) {
+            UserSession(
+                accessToken = accessToken,
+                refreshToken = refreshToken,
+                userId = userId,
+                phone = phone,
+                nickname = nickname,
+                avatar = avatar,
+                isLoggedIn = true
+            )
+        } else {
+            UserSession.EMPTY
         }
     }
 
     /**
-     * 更新 Token
-     * 在 IO 线程执行写操作
-     */
-    suspend fun updateTokens(accessToken: String, refreshToken: String) {
-        context.dataStore.edit { preferences ->
-            preferences[KEY_ACCESS_TOKEN] = accessToken
-            preferences[KEY_REFRESH_TOKEN] = refreshToken
-        }
-    }
-
-    /**
-     * 清除会话（登出）
-     * 全量清理：用户退出登录时的全局清理逻辑，确保敏感信息被安全重置
-     */
-    suspend fun clearSession() {
-        context.dataStore.edit { preferences ->
-            preferences.clear()
-        }
-    }
-
-    /**
-     * 检查是否已登录
+     * 是否已登录的流
      */
     fun isLoggedIn(): Flow<Boolean> = userSession.map { it.isLoggedIn }
+
+    /**
+     * 保存完整会话信息
+     *
+     * @param session 用户会话
+     */
+    suspend fun saveSession(session: UserSession) = prefs.saveSession(
+        access = session.accessToken,
+        refresh = session.refreshToken,
+        userId = session.userId,
+        phone = session.phone,
+        nickname = session.nickname,
+        avatar = session.avatar
+    )
+
+    /**
+     * 仅更新 Token（Token 刷新时使用）
+     *
+     * @param accessToken  新 AccessToken
+     * @param refreshToken 新 RefreshToken
+     */
+    suspend fun updateTokens(accessToken: String, refreshToken: String) =
+        prefs.updateTokens(accessToken, refreshToken)
+
+    /**
+     * 清除会话（退出登录）
+     * 全量清理敏感信息，确保退出后无数据残留
+     */
+    suspend fun clearSession() = prefs.clearSession()
 }

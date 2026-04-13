@@ -176,7 +176,7 @@ fun SetPasswordScreen(
                     Text(
                         text = errorMessage,
                         style = LocalTypography.current.bodySmall,
-                        color = Color.Red,
+                        color = LocalAppColors.current.googleRed,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -227,7 +227,7 @@ private fun PasswordRuleItem(
     modifier: Modifier = Modifier
 ) {
     val color = when {
-        isValid -> Color(0xFF4CAF50)
+        isValid -> LocalAppColors.current.successColor
         else -> LocalAppColors.current.auxiliaryTextColor
     }
     val prefix = if (isValid) "● " else "○ "

@@ -103,7 +103,7 @@ fun ForgotPasswordScreen(
                     Text(
                         text = stringResource(it.messageResId),
                         style = LocalTypography.current.bodySmall,
-                        color = Color.Red,
+                        color = LocalAppColors.current.googleRed,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )

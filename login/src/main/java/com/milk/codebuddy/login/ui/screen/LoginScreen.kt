@@ -215,7 +215,7 @@ private fun ErrorMessage(loginState: LoginState) {
         Text(
             text = stringResource(loginState.messageResId),
             style = LocalTypography.current.bodySmall,
-            color = androidx.compose.ui.graphics.Color.Red,
+            color = LocalAppColors.current.googleRed,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )

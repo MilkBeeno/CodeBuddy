@@ -287,11 +287,7 @@ private fun EmailInputField(
                 value = email,
                 onValueChange = onEmailChange,
                 modifier = Modifier.fillMaxWidth(),
-                textStyle = TextStyle(
-                    color = colors.primaryTextColor,
-                    fontSize = typography.bodyLarge.fontSize,
-                    fontWeight = typography.bodyLarge.fontWeight
-                ),
+                textStyle = typography.bodyLarge.copy(color = colors.primaryTextColor),
                 cursorBrush = SolidColor(colors.primaryTextColor),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 singleLine = true,
@@ -341,11 +337,7 @@ private fun EmailPasswordField(
                 value = password,
                 onValueChange = onPasswordChange,
                 modifier = Modifier.fillMaxWidth(),
-                textStyle = TextStyle(
-                    color = colors.primaryTextColor,
-                    fontSize = typography.bodyLarge.fontSize,
-                    fontWeight = typography.bodyLarge.fontWeight
-                ),
+                textStyle = typography.bodyLarge.copy(color = colors.primaryTextColor),
                 cursorBrush = SolidColor(colors.primaryTextColor),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),

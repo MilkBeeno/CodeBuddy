@@ -141,7 +141,7 @@ fun VerifyEmailScreen(
                     Text(
                         text = errorMessage,
                         style = LocalTypography.current.bodySmall,
-                        color = Color.Red,
+                        color = LocalAppColors.current.googleRed,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }

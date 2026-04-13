@@ -1,6 +1,7 @@
 package com.milk.codebuddy.login.data.repository
 
 import android.content.Context
+import com.milk.codebuddy.base.datastore.AppPreferences
 import com.milk.codebuddy.base.network.RetrofitFactory
 import com.milk.codebuddy.login.data.local.SessionManager
 import com.milk.codebuddy.login.data.remote.LoginApi
@@ -41,7 +42,8 @@ object AuthRepositoryProvider {
         if (instance != null) return
         synchronized(this) {
             if (instance != null) return
-            val sessionManager = SessionManager(context.applicationContext)
+            val prefs = AppPreferences(context.applicationContext)
+            val sessionManager = SessionManager(prefs)
             val loginApi = RetrofitFactory(
                 baseUrl = baseUrl,
                 isDebug = isDebug,

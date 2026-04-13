@@ -18,11 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.milk.codebuddy.base.ui.theme.LocalAppColors
+import com.milk.codebuddy.base.ui.theme.LocalTypography
 import com.milk.codebuddy.login.ui.components.CountdownButton
 import com.milk.codebuddy.resource.R
 import kotlinx.coroutines.delay
@@ -68,14 +67,13 @@ fun SplashScreen(
         ) {
             Text(
                 text = stringResource(R.string.login_splash_app_name),
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Bold,
+                style = LocalTypography.current.displaySmall,
                 color = LocalAppColors.current.primaryTextColor
             )
 
             Text(
                 text = stringResource(R.string.login_splash_slogan),
-                fontSize = 16.sp,
+                style = LocalTypography.current.bodyLarge,
                 color = LocalAppColors.current.auxiliaryTextColor,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 16.dp)

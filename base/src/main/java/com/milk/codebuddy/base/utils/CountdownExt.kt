@@ -32,3 +32,28 @@ fun countdownFlow(totalSeconds: Int = 60): Flow<Int> = flow {
 }
     .flowOn(Dispatchers.Default)
     .catch { /* 倒计时异常静默处理 */ }
+
+// ── 校验工具 ────────────────────────────────────────────────────────────────
+
+/**
+ * 中国大陆手机号正则（1开头，第二位3-9，共11位）
+ *
+ * 使用示例：
+ * ```kotlin
+ * if (!phone.isValidPhone()) { showPhoneError() }
+ * ```
+ */
+private const val PHONE_REGEX = "^1[3-9]\\d{9}$"
+
+/**
+ * 校验是否为合法中国大陆手机号
+ *
+ * @return true 表示格式合法
+ */
+fun String.isValidPhone(): Boolean =
+    isNotEmpty() && PHONE_REGEX.toRegex().matches(this)
+
+// ── 业务常量 ─────────────────────────────────────────────────────────────────
+
+/** 发送验证码后的默认倒计时秒数 */
+const val DEFAULT_COUNTDOWN_SECONDS = 60

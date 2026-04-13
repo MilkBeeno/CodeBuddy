@@ -50,6 +50,8 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.gson)
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
     testImplementation(libs.junit)

@@ -17,26 +17,17 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.milk.codebuddy.base.ui.theme.AppTheme
 import com.milk.codebuddy.base.ui.theme.LocalAppColors
 import com.milk.codebuddy.base.ui.theme.LocalTypography
@@ -63,10 +54,11 @@ fun SignUpEntryScreen(
     onNavigateToSignIn: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalAppColors.current
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(colors.primaryBackgroundColor)
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
@@ -152,56 +144,55 @@ private fun SignUpTopBar(
     onRegionClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalAppColors.current
+    val typography = LocalTypography.current
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 关闭按钮 40×40 圆形 #e3e6e8
+        // 关闭按钮 40×40 圆形
         Box(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFE3E6E8))
+                .background(colors.auxiliaryBackgroundColor)
                 .clickable(onClick = onClose),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "✕",
-                color = Color(0xFF333333),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
+                color = colors.primaryTextColor,
+                style = typography.bodyLarge
             )
         }
 
-        // 地区选择按钮 h=32 圆角 full #e3e6e8 gap=4 pad=H8V4
+        // 地区选择按钮
         Row(
             modifier = Modifier
                 .clip(CircleShape)
-                .background(Color(0xFFE3E6E8))
+                .background(colors.auxiliaryBackgroundColor)
                 .clickable(onClick = onRegionClick)
                 .padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            // 国旗 20×20 圆形占位（实际替换为真实国旗图片）
+            // 国旗占位（实际替换为真实国旗图片）
             Box(
                 modifier = Modifier
                     .size(20.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFF007B3E))
+                    .background(colors.accentColor)
             )
             Text(
                 text = "Singapore",
-                color = Color(0xFF333333),
-                fontSize = 14.sp,
-                fontWeight = FontWeight(510)
+                color = colors.primaryTextColor,
+                style = typography.bodySmall
             )
-            // 下拉箭头
             Text(
                 text = "▾",
-                color = Color(0xFF333333),
-                fontSize = 12.sp
+                color = colors.primaryTextColor,
+                style = typography.labelSmall
             )
         }
     }
@@ -210,28 +201,24 @@ private fun SignUpTopBar(
 /**
  * 标题区域
  * Figma: Frame 29 [VERTICAL] gap=4
- * - 主标题：fs=24 fw=700 #333333
- * - 副标题：fs=16 fw=400 #666666
  */
 @Composable
 private fun SignUpHeader(modifier: Modifier = Modifier) {
+    val colors = LocalAppColors.current
+    val typography = LocalTypography.current
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
             text = "Start for free.\nConnect with millions of real traders worldwide.",
-            color = Color(0xFF333333),
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            lineHeight = 32.sp
+            color = colors.primaryTextColor,
+            style = typography.headlineSmall
         )
         Text(
             text = "Connect, share, and improve together",
-            color = Color(0xFF666666),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Normal,
-            lineHeight = 24.sp
+            color = colors.secondaryTextColor,
+            style = typography.bodyLarge
         )
     }
 }
@@ -239,7 +226,6 @@ private fun SignUpHeader(modifier: Modifier = Modifier) {
 /**
  * 注册按钮组
  * Figma: Frame 27 [VERTICAL] gap=12
- * 按钮规格：h=48 圆角 full #e3e6e8 gap=4 pad=H16V4 文字 fs=18 fw=590
  */
 @Composable
 private fun SignUpButtonGroup(
@@ -248,6 +234,8 @@ private fun SignUpButtonGroup(
     onSignUpWithApple: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalAppColors.current
+    val typography = LocalTypography.current
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -255,20 +243,17 @@ private fun SignUpButtonGroup(
         SignUpSocialButton(
             text = "Sign up with email",
             leadingContent = {
-                // 邮件图标占位
-                Text(text = "✉", color = Color(0xFF231815), fontSize = 16.sp)
+                Text(text = "✉", color = colors.primaryTextColor, style = typography.bodyLarge)
             },
             onClick = onSignUpWithEmail
         )
         SignUpSocialButton(
             text = "Sign up with Google",
             leadingContent = {
-                // Google 图标占位（实际使用 painterResource）
                 Text(
                     text = "G",
-                    color = Color(0xFFEA4335),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                    color = colors.googleRed,
+                    style = typography.titleMedium
                 )
             },
             onClick = onSignUpWithGoogle
@@ -276,8 +261,7 @@ private fun SignUpButtonGroup(
         SignUpSocialButton(
             text = "Sign up with Apple ID",
             leadingContent = {
-                // Apple 图标占位
-                Text(text = "", color = Color(0xFF333333), fontSize = 16.sp)
+                Text(text = "", color = colors.primaryTextColor, style = typography.bodyLarge)
             },
             onClick = onSignUpWithApple
         )
@@ -286,7 +270,7 @@ private fun SignUpButtonGroup(
 
 /**
  * 通用社交登录按钮
- * 规格：fillMaxWidth h=48 圆角 full #e3e6e8 gap=4 pad=H16V4
+ * 规格：fillMaxWidth h=48 圆角 full
  */
 @Composable
 private fun SignUpSocialButton(
@@ -295,13 +279,15 @@ private fun SignUpSocialButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalAppColors.current
+    val typography = LocalTypography.current
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
             .clip(CircleShape)
             .clickable(onClick = onClick),
-        color = Color(0xFFE3E6E8),
+        color = colors.auxiliaryBackgroundColor,
         shape = CircleShape
     ) {
         Row(
@@ -317,9 +303,8 @@ private fun SignUpSocialButton(
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = text,
-                color = Color(0xFF333333),
-                fontSize = 18.sp,
-                fontWeight = FontWeight(590)
+                color = colors.primaryTextColor,
+                style = typography.titleMedium
             )
         }
     }
@@ -327,10 +312,12 @@ private fun SignUpSocialButton(
 
 /**
  * "or" 分隔线
- * Figma: Frame 8 [HORIZONTAL] gap=10，两侧 RECTANGLE 1px #000000（实际用灰色）
+ * Figma: Frame 8 [HORIZONTAL] gap=10
  */
 @Composable
 private fun SignUpOrDivider(modifier: Modifier = Modifier) {
+    val colors = LocalAppColors.current
+    val typography = LocalTypography.current
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -338,18 +325,17 @@ private fun SignUpOrDivider(modifier: Modifier = Modifier) {
     ) {
         HorizontalDivider(
             modifier = Modifier.weight(1f),
-            color = Color(0xFFE0E0E0),
+            color = colors.dividerColor,
             thickness = 1.dp
         )
         Text(
             text = "or",
-            color = Color(0xFF666666),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Normal
+            color = colors.secondaryTextColor,
+            style = typography.titleSmall
         )
         HorizontalDivider(
             modifier = Modifier.weight(1f),
-            color = Color(0xFFE0E0E0),
+            color = colors.dividerColor,
             thickness = 1.dp
         )
     }
@@ -358,14 +344,14 @@ private fun SignUpOrDivider(modifier: Modifier = Modifier) {
 /**
  * 已有账号跳转行
  * Figma: Frame 1014 [HORIZONTAL] gap=4
- * - "Already have an account?" #333333 fs=16
- * - "Sign in" #1f72e8 fs=16
  */
 @Composable
 private fun SignInLink(
     onNavigateToSignIn: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalAppColors.current
+    val typography = LocalTypography.current
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.Center,
@@ -373,16 +359,14 @@ private fun SignInLink(
     ) {
         Text(
             text = "Already have an account?",
-            color = Color(0xFF333333),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Normal
+            color = colors.primaryTextColor,
+            style = typography.bodyMedium
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
             text = "Sign in",
-            color = Color(0xFF1F72E8),
-            fontSize = 16.sp,
-            fontWeight = FontWeight(510),
+            color = colors.accentColor,
+            style = typography.bodyMedium,
             modifier = Modifier.clickable(onClick = onNavigateToSignIn)
         )
     }
@@ -390,17 +374,17 @@ private fun SignInLink(
 
 /**
  * 隐私协议文案
- * Figma: 隐私协议 INSTANCE fs=14 #666666 居中
+ * Figma: 隐私协议 INSTANCE fs=14 居中
  */
 @Composable
 private fun SignUpPrivacyText(modifier: Modifier = Modifier) {
+    val colors = LocalAppColors.current
+    val typography = LocalTypography.current
     Text(
         text = "By proceeding, you agree to the Terms and Conditions and Privacy Policy",
-        color = Color(0xFF666666),
-        fontSize = 14.sp,
-        fontWeight = FontWeight.Normal,
+        color = colors.secondaryTextColor,
+        style = typography.bodySmall,
         textAlign = TextAlign.Center,
-        lineHeight = 20.sp,
         modifier = modifier
     )
 }

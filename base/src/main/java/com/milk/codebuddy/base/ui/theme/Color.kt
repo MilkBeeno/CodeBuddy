@@ -21,6 +21,7 @@ val Color_1E1E1E = Color(0xFF1E1E1E)
 val Color_2D2D2D = Color(0xFF2D2D2D)
 val Color_BB86FC = Color(0xFFBB86FC)
 val Color_018786 = Color(0xFF018786)
+val Color_4CAF50 = Color(0xFF4CAF50)
 
 // ── 语义层 AppColors（业务代码唯一入口，通过 LocalAppColors.current 访问）──────
 data class AppColors(
@@ -43,5 +44,7 @@ data class AppColors(
     /** 分割线 / 边框颜色 */
     val dividerColor: Color,
     /** Google 红（第三方登录图标等） */
-    val googleRed: Color
+    val googleRed: Color,
+    /** 成功 / 校验通过颜色 */
+    val successColor: Color
 )

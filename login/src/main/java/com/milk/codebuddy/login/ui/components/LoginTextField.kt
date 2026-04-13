@@ -9,7 +9,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -89,15 +88,15 @@ fun LoginTextField(
             unfocusedTextColor = LocalAppColors.current.primaryTextColor,
             focusedBorderColor = LocalAppColors.current.primaryTextColor,
             unfocusedBorderColor = LocalAppColors.current.secondaryTextColor,
-            errorBorderColor = Color.Red,
-            errorTextColor = Color.Red,
-            errorSupportingTextColor = Color.Red,
+            errorBorderColor = LocalAppColors.current.googleRed,
+            errorTextColor = LocalAppColors.current.googleRed,
+            errorSupportingTextColor = LocalAppColors.current.googleRed,
             focusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
             unfocusedPlaceholderColor = LocalAppColors.current.secondaryTextColor,
             cursorColor = LocalAppColors.current.primaryTextColor,
             focusedLabelColor = LocalAppColors.current.primaryTextColor,
             unfocusedLabelColor = LocalAppColors.current.secondaryTextColor,
-            errorLabelColor = Color.Red
+            errorLabelColor = LocalAppColors.current.googleRed
         )
     )
 }

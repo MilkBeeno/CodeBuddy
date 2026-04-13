@@ -3,7 +3,9 @@ package com.milk.codebuddy.login.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.milk.codebuddy.base.network.ApiResult
+import com.milk.codebuddy.base.utils.DEFAULT_COUNTDOWN_SECONDS
 import com.milk.codebuddy.base.utils.countdownFlow
+import com.milk.codebuddy.base.utils.isValidPhone
 import com.milk.codebuddy.login.data.repository.AuthRepository
 import com.milk.codebuddy.login.ui.state.RegisterEffect
 import com.milk.codebuddy.login.ui.state.RegisterState
@@ -16,7 +18,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.regex.Pattern
 
 /**
  * 注册 ViewModel（MVI 架构）
@@ -28,8 +29,7 @@ class RegisterViewModel(
 ) : ViewModel() {
 
     companion object {
-        private const val PHONE_REGEX = "^1[3-9]\\d{9}$"
-        private const val COUNTDOWN_SECONDS = 60
+        private const val COUNTDOWN_SECONDS = DEFAULT_COUNTDOWN_SECONDS
         private const val PASSWORD_MIN_LENGTH = 6
         private const val PASSWORD_MAX_LENGTH = 20
     }
@@ -153,8 +153,7 @@ class RegisterViewModel(
         }
     }
 
-    private fun validatePhone(phone: String): Boolean =
-        phone.isNotEmpty() && Pattern.matches(PHONE_REGEX, phone)
+    private fun validatePhone(phone: String): Boolean = phone.isValidPhone()
 
     private fun getErrorMessageRes(code: Int): Int = when (code) {
         in 500..599 -> ResourceR.string.register_error_server
