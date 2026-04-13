@@ -34,33 +34,35 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.milk.codebuddy.base.ui.theme.AppTheme
+import com.milk.codebuddy.base.ui.theme.LocalAppColors
+import com.milk.codebuddy.base.ui.theme.LocalTypography
 
 /**
  * 邮箱登录页 —— 对应设计稿 "Log in - Email" (node: 110:4530)
  *
  * Figma 规格：
- * - 页面：414×896 白底 #ffffff，VERTICAL layout，pad=H16
- * - 顶部：关闭按钮 40×40 圆形 #e3e6e8
- * - 标题："Sign in with Email" fs=24 fw=700 #333333
- * - 邮箱输入框：h=56 r=12 border=1px #000000
- * - 密码输入框：h=56 r=12 border=1px #000000，含 eye 图标
- * - Sign In 按钮：h=48 圆角 full #333333 白字 fs=18 fw=590
+ * - 页面：414×896 白底，VERTICAL layout，pad=H16
+ * - 顶部：关闭按钮 40×40 圆形 auxiliaryBackgroundColor
+ * - 标题："Sign in with Email" headlineSmall
+ * - 邮箱输入框：h=56 r=12 border=1px primaryTextColor
+ * - 密码输入框：h=56 r=12 border=1px primaryTextColor，含 eye 图标
+ * - Sign In 按钮：h=48 圆角 full primaryTextColor 白字 titleLarge
  * - "or" 分隔线
- * - 第三方登录：Google / Apple ID / Phone Number，各 h=48 圆角 full #e3e6e8
- * - 底部：Don't have an account? Sign up for free（蓝色 #1f72e8）
- * - Forgot Password? #666666 居中
+ * - 第三方登录：Google / Apple ID / Phone Number，各 h=48 圆角 full auxiliaryBackgroundColor
+ * - 底部：Don't have an account? Sign up for free（accentColor）
+ * - Forgot Password? secondaryTextColor 居中
+ *
+ * 注意：email / password / passwordVisible 状态由上层 ViewModel 管理（此处暂为 preview-only 组件，
+ * 接入 ViewModel 时应将状态提升并删除 remember 块）。
  */
 @Composable
 fun LoginEmailScreen(
@@ -74,14 +76,18 @@ fun LoginEmailScreen(
     isLoading: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    // TODO: 接入真实 ViewModel 后将这三个状态提升到 ViewModel
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    val colors = LocalAppColors.current
+    val typography = LocalTypography.current
+
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(colors.primaryBackgroundColor)
             .imePadding()
             .navigationBarsPadding()
     ) {
@@ -102,15 +108,14 @@ fun LoginEmailScreen(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFE3E6E8))
+                        .background(colors.auxiliaryBackgroundColor)
                         .clickable(onClick = onClose),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "✕",
-                        color = Color(0xFF333333),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
+                        color = colors.primaryTextColor,
+                        style = typography.titleSmall
                     )
                 }
             }
@@ -120,10 +125,8 @@ fun LoginEmailScreen(
             // ── 标题 ─────────────────────────────────────────────────────
             Text(
                 text = "Sign in with Email",
-                color = Color(0xFF333333),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                lineHeight = 32.sp,
+                color = colors.primaryTextColor,
+                style = typography.headlineSmall,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
@@ -136,13 +139,7 @@ fun LoginEmailScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // 邮箱输入框
-                EmailInputField(
-                    email = email,
-                    onEmailChange = { email = it }
-                )
-
-                // 密码输入框
+                EmailInputField(email = email, onEmailChange = { email = it })
                 EmailPasswordField(
                     password = password,
                     onPasswordChange = { password = it },
@@ -170,18 +167,17 @@ fun LoginEmailScreen(
             ) {
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
-                    color = Color(0xFFE0E0E0),
+                    color = colors.dividerColor,
                     thickness = 1.dp
                 )
                 Text(
                     text = "or",
-                    color = Color(0xFF333333),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Normal
+                    color = colors.primaryTextColor,
+                    style = typography.titleMedium
                 )
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
-                    color = Color(0xFFE0E0E0),
+                    color = colors.dividerColor,
                     thickness = 1.dp
                 )
             }
@@ -189,37 +185,32 @@ fun LoginEmailScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             // ── 第三方登录按钮组 ──────────────────────────────────────────
-            // Figma: Frame 27 [VERTICAL] gap=12
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Sign in with Google
                 ThirdPartyLoginButton(
                     text = "Sign in with Google",
                     leadingContent = {
                         Text(
                             text = "G",
-                            color = Color(0xFFEA4335),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
+                            color = colors.googleRed,
+                            style = typography.titleSmall
                         )
                     },
                     onClick = onSignInWithGoogle
                 )
-                // Sign in with Apple ID
                 ThirdPartyLoginButton(
                     text = "Sign in with Apple ID",
                     leadingContent = {
-                        Text(text = "", color = Color(0xFF333333), fontSize = 16.sp)
+                        Text(text = "", color = colors.primaryTextColor, style = typography.titleSmall)
                     },
                     onClick = onSignInWithApple
                 )
-                // Sign in with Phone Number
                 ThirdPartyLoginButton(
                     text = "Sign in with Phone Number",
                     leadingContent = {
-                        Text(text = "☎", color = Color(0xFF333333), fontSize = 16.sp)
+                        Text(text = "☎", color = colors.primaryTextColor, style = typography.titleSmall)
                     },
                     onClick = onSignInWithPhone
                 )
@@ -228,8 +219,6 @@ fun LoginEmailScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // ── 注册跳转 ─────────────────────────────────────────────────
-            // Figma: Frame 1014 [HORIZONTAL] gap=4
-            // "Don't have an account yet?" #333333  "Sign up for free" #1f72e8
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -237,16 +226,14 @@ fun LoginEmailScreen(
             ) {
                 Text(
                     text = "Don't have an account yet?",
-                    color = Color(0xFF333333),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal
+                    color = colors.primaryTextColor,
+                    style = typography.bodyLarge
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "Sign up for free",
-                    color = Color(0xFF1F72E8),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal,
+                    color = colors.accentColor,
+                    style = typography.bodyLarge,
                     modifier = Modifier.clickable(onClick = onSignUp)
                 )
             }
@@ -256,9 +243,8 @@ fun LoginEmailScreen(
             // ── Forgot Password ───────────────────────────────────────────
             Text(
                 text = "Forgot Password?",
-                color = Color(0xFF666666),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
+                color = colors.secondaryTextColor,
+                style = typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -274,7 +260,7 @@ fun LoginEmailScreen(
 
 /**
  * 邮箱输入框
- * Figma: 文本选中 382×56 [HORIZONTAL] gap=16 pad=T4R16B4L16 r=12 border=1px #000000
+ * Figma: 382×56 [HORIZONTAL] r=12 border=1px primaryTextColor
  */
 @Composable
 private fun EmailInputField(
@@ -282,11 +268,13 @@ private fun EmailInputField(
     onEmailChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalAppColors.current
+    val typography = LocalTypography.current
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
-            .border(1.dp, Color(0xFF000000), RoundedCornerShape(12.dp))
+            .border(1.dp, colors.primaryTextColor, RoundedCornerShape(12.dp))
             .padding(horizontal = 16.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -294,22 +282,17 @@ private fun EmailInputField(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            Text(
-                text = "Email",
-                color = Color(0xFF999999),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Normal
-            )
+            Text(text = "Email", color = colors.auxiliaryTextColor, style = typography.labelMedium)
             BasicTextField(
                 value = email,
                 onValueChange = onEmailChange,
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = TextStyle(
-                    color = Color(0xFF333333),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal
+                    color = colors.primaryTextColor,
+                    fontSize = typography.bodyLarge.fontSize,
+                    fontWeight = typography.bodyLarge.fontWeight
                 ),
-                cursorBrush = SolidColor(Color(0xFF333333)),
+                cursorBrush = SolidColor(colors.primaryTextColor),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 singleLine = true,
                 decorationBox = { innerTextField ->
@@ -317,8 +300,8 @@ private fun EmailInputField(
                         if (email.isEmpty()) {
                             Text(
                                 text = "Enter email address",
-                                color = Color(0xFFCCCCCC),
-                                fontSize = 16.sp
+                                color = colors.hintTextColor,
+                                style = typography.bodyLarge
                             )
                         }
                         innerTextField()
@@ -331,8 +314,7 @@ private fun EmailInputField(
 
 /**
  * 密码输入框（含显示/隐藏按钮）
- * Figma: 文本选中 382×56 [HORIZONTAL] gap=8 pad=T4R16B4L16 r=12 border=1px #000000
- *        右侧：显示 INSTANCE 20×20
+ * Figma: 382×56 [HORIZONTAL] r=12 border=1px primaryTextColor
  */
 @Composable
 private fun EmailPasswordField(
@@ -342,32 +324,29 @@ private fun EmailPasswordField(
     onVisibilityToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalAppColors.current
+    val typography = LocalTypography.current
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
-            .border(1.dp, Color(0xFF000000), RoundedCornerShape(12.dp))
+            .border(1.dp, colors.primaryTextColor, RoundedCornerShape(12.dp))
             .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                text = "Password",
-                color = Color(0xFF999999),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Normal
-            )
+            Text(text = "Password", color = colors.auxiliaryTextColor, style = typography.labelMedium)
             BasicTextField(
                 value = password,
                 onValueChange = onPasswordChange,
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = TextStyle(
-                    color = Color(0xFF333333),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal
+                    color = colors.primaryTextColor,
+                    fontSize = typography.bodyLarge.fontSize,
+                    fontWeight = typography.bodyLarge.fontWeight
                 ),
-                cursorBrush = SolidColor(Color(0xFF333333)),
+                cursorBrush = SolidColor(colors.primaryTextColor),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
                 singleLine = true,
@@ -376,8 +355,8 @@ private fun EmailPasswordField(
                         if (password.isEmpty()) {
                             Text(
                                 text = "Enter password",
-                                color = Color(0xFFCCCCCC),
-                                fontSize = 16.sp
+                                color = colors.hintTextColor,
+                                style = typography.bodyLarge
                             )
                         }
                         innerTextField()
@@ -385,12 +364,11 @@ private fun EmailPasswordField(
                 }
             )
         }
-
-        // Eye 图标 20×20
+        // Eye 图标
         Text(
             text = if (visible) "👁" else "👁‍🗨",
-            fontSize = 18.sp,
-            color = Color(0xFF666666),
+            style = typography.titleMedium,
+            color = colors.secondaryTextColor,
             modifier = Modifier
                 .size(20.dp)
                 .clickable(onClick = onVisibilityToggle)
@@ -400,7 +378,7 @@ private fun EmailPasswordField(
 
 /**
  * 邮箱登录的 Sign In 按钮
- * Figma: 按钮 382×48 圆角 full bg=#333333 文字白 fs=18 fw=590
+ * Figma: 382×48 圆角 full bg=primaryTextColor 文字 primaryBackgroundColor
  */
 @Composable
 private fun EmailSignInButton(
@@ -408,27 +386,28 @@ private fun EmailSignInButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalAppColors.current
+    val typography = LocalTypography.current
     Surface(
         modifier = modifier
             .height(48.dp)
             .clip(CircleShape)
             .clickable(enabled = !isLoading, onClick = onClick),
-        color = Color(0xFF333333),
+        color = colors.primaryTextColor,
         shape = CircleShape
     ) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             if (isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
-                    color = Color.White,
+                    color = colors.primaryBackgroundColor,
                     strokeWidth = 2.dp
                 )
             } else {
                 Text(
                     text = "Sign In",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight(590)
+                    color = colors.primaryBackgroundColor,
+                    style = typography.titleLarge
                 )
             }
         }
@@ -437,7 +416,7 @@ private fun EmailSignInButton(
 
 /**
  * 第三方登录通用按钮
- * Figma: 按钮 382×48 圆角 full bg=#e3e6e8 gap=4 pad=H16V4 文字 fs=18 fw=590 #333333
+ * Figma: 382×48 圆角 full bg=auxiliaryBackgroundColor 文字 primaryTextColor
  */
 @Composable
 private fun ThirdPartyLoginButton(
@@ -446,13 +425,15 @@ private fun ThirdPartyLoginButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalAppColors.current
+    val typography = LocalTypography.current
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
             .clip(CircleShape)
             .clickable(onClick = onClick),
-        color = Color(0xFFE3E6E8),
+        color = colors.auxiliaryBackgroundColor,
         shape = CircleShape
     ) {
         Row(
@@ -468,9 +449,8 @@ private fun ThirdPartyLoginButton(
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = text,
-                color = Color(0xFF333333),
-                fontSize = 18.sp,
-                fontWeight = FontWeight(590)
+                color = colors.primaryTextColor,
+                style = typography.titleLarge
             )
         }
     }

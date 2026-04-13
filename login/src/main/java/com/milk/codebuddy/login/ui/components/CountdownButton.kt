@@ -18,10 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.milk.codebuddy.base.ui.theme.LocalTypography
 import com.milk.codebuddy.resource.R
+
+/** 倒计时按钮背景：半透明黑（启动图之上固定叠加，不随主题变化） */
+private val CountdownButtonBackground = Color(0x80000000)
 
 /**
  * 倒计时按钮状态
@@ -33,12 +35,13 @@ data class CountdownButtonState(
 )
 
 /**
- * 倒计时按钮组件
- * 
- * 技术栈规范：
- * - 状态提升：Composable 必须尽可能"无状态"
- * - Material 3：优先使用 M3 组件库
- * - 交互反馈：点击操作必须包含波纹效果
+ * 启动页跳过倒计时按钮
+ *
+ * 该组件叠加在启动页图片之上，采用固定半透明黑背景 + 白色文字，不跟随主题。
+ * 字体尺寸/粗细通过 [LocalTypography] 引用，禁止硬编码。
+ *
+ * @param remainingSeconds 倒计时剩余秒数
+ * @param onSkip           点击跳过回调
  */
 @Composable
 fun CountdownButton(
@@ -46,10 +49,11 @@ fun CountdownButton(
     onSkip: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val typography = LocalTypography.current
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(color = Color(0x80000000))
+            .background(color = CountdownButtonBackground)
             .clickable(onClick = onSkip)
             .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -57,8 +61,7 @@ fun CountdownButton(
         Text(
             text = stringResource(R.string.login_splash_skip),
             color = Color.White,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Normal
+            style = typography.bodyMedium
         )
 
         Spacer(modifier = Modifier.size(4.dp))
@@ -66,8 +69,7 @@ fun CountdownButton(
         Text(
             text = stringResource(R.string.login_splash_countdown, remainingSeconds),
             color = Color.White,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold
+            style = typography.labelLarge
         )
 
         Spacer(modifier = Modifier.size(4.dp))

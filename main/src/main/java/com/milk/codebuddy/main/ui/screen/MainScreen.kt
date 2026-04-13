@@ -28,35 +28,33 @@ fun MainScreen(
     val navController = LocalNavController.current
     var selectedTab by rememberSaveable { mutableStateOf(MainTab.HOME) }
 
-    AppTheme {
-        Scaffold(
-            bottomBar = {
-                BottomNavigation(
-                    selectedTab = selectedTab,
-                    onTabSelected = { selectedTab = it }
-                )
-            },
-            modifier = modifier,
-            containerColor = LocalAppColors.current.primaryBackgroundColor,
-            contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
-        ) { innerPadding ->
-            when (selectedTab) {
-                MainTab.HOME -> HomeScreen(
-                    onAddTransactionClick = {
-                        navController.navigate(AddTransaction)
-                    },
-                    modifier = Modifier.padding(innerPadding)
-                )
-                MainTab.MESSAGE -> MessageScreen(
-                    modifier = Modifier.padding(innerPadding)
-                )
-                MainTab.PLAY -> PlayScreen(
-                    modifier = Modifier.padding(innerPadding)
-                )
-                MainTab.MINE -> MineScreen(
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
+    Scaffold(
+        bottomBar = {
+            BottomNavigation(
+                selectedTab = selectedTab,
+                onTabSelected = { selectedTab = it }
+            )
+        },
+        modifier = modifier,
+        containerColor = LocalAppColors.current.primaryBackgroundColor,
+        contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
+    ) { innerPadding ->
+        when (selectedTab) {
+            MainTab.HOME -> HomeScreen(
+                onAddTransactionClick = {
+                    navController.navigate(AddTransaction)
+                },
+                modifier = Modifier.padding(innerPadding)
+            )
+            MainTab.MESSAGE -> MessageScreen(
+                modifier = Modifier.padding(innerPadding)
+            )
+            MainTab.PLAY -> PlayScreen(
+                modifier = Modifier.padding(innerPadding)
+            )
+            MainTab.MINE -> MineScreen(
+                modifier = Modifier.padding(innerPadding)
+            )
         }
     }
 }

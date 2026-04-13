@@ -17,12 +17,16 @@ val LocalAppColors = staticCompositionLocalOf<AppColors> {
 
 // 亮色主题应用颜色
 internal val LightAppColors = AppColors(
-    primaryTextColor = Color_000000,
+    primaryTextColor = Color_333333,
     secondaryTextColor = Color_666666,
     auxiliaryTextColor = Color_999999,
+    hintTextColor = Color_CCCCCC,
     primaryBackgroundColor = Color_FFFFFF,
     secondaryBackgroundColor = Color_F5F5F5,
-    auxiliaryBackgroundColor = Color_E0E0E0
+    auxiliaryBackgroundColor = Color_E3E6E8,
+    accentColor = Color_1F72E8,
+    dividerColor = Color_E0E0E0,
+    googleRed = Color_EA4335
 )
 
 // 暗色主题应用颜色
@@ -30,9 +34,13 @@ internal val DarkAppColors = AppColors(
     primaryTextColor = Color_FFFFFF,
     secondaryTextColor = Color_999999,
     auxiliaryTextColor = Color_666666,
+    hintTextColor = Color_999999,
     primaryBackgroundColor = Color_121212,
     secondaryBackgroundColor = Color_1E1E1E,
-    auxiliaryBackgroundColor = Color_2D2D2D
+    auxiliaryBackgroundColor = Color_2D2D2D,
+    accentColor = Color_1F72E8,
+    dividerColor = Color_2D2D2D,
+    googleRed = Color_EA4335
 )
 
 @Composable

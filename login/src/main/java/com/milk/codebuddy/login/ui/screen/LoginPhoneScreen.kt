@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,29 +32,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.milk.codebuddy.base.ui.theme.AppTheme
+import com.milk.codebuddy.base.ui.theme.LocalAppColors
+import com.milk.codebuddy.base.ui.theme.LocalTypography
 
 /**
  * 手机号登录页 —— 对应设计稿 "Log in - Phone number" (node: 110:4124)
  *
  * Figma 规格：
- * - 页面：414×896 白底 #ffffff，VERTICAL layout
- * - 顶部：关闭按钮 40×40 圆形 #e3e6e8
- * - 标题："Sign in with Phone Number" fs=24 fw=700 #333333
- * - 电话输入框：h=60 圆角 r=12 border=1px #000000，内含区号选择 + 电话号码输入
- * - 密码/验证码输入框：h=56 圆角 r=12 border=1px #000000
- * - Sign In 按钮：h=48 圆角 full 背景 #333333 文字白色 fs=18 fw=590
- * - 底部：Forgot Password? #666666 fs=16 居中
+ * - 页面：414×896 白底，VERTICAL layout
+ * - 顶部：关闭按钮 40×40 圆形 auxiliaryBackgroundColor
+ * - 标题："Sign in with Phone Number" headlineSmall
+ * - 电话输入框：h=60 r=12 border=1px primaryTextColor，内含区号选择 + 电话号码输入
+ * - 密码/验证码输入框：h=56 r=12 border=1px primaryTextColor
+ * - Sign In 按钮：h=48 圆角 full primaryTextColor 白字 titleLarge
+ * - 底部：Forgot Password? secondaryTextColor 居中
  */
 @Composable
 fun LoginPhoneScreen(
@@ -66,14 +65,18 @@ fun LoginPhoneScreen(
     isLoading: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    // TODO: 接入真实 ViewModel 后将这三个状态提升到 ViewModel
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    val colors = LocalAppColors.current
+    val typography = LocalTypography.current
+
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(colors.primaryBackgroundColor)
             .imePadding()
             .navigationBarsPadding()
     ) {
@@ -93,10 +96,8 @@ fun LoginPhoneScreen(
             // ── 标题 ─────────────────────────────────────────────────────
             Text(
                 text = "Sign in with Phone Number",
-                color = Color(0xFF333333),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                lineHeight = 32.sp,
+                color = colors.primaryTextColor,
+                style = typography.headlineSmall,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
@@ -109,15 +110,12 @@ fun LoginPhoneScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // 电话号码输入框（含区号选择）
                 PhoneNumberInput(
                     phone = phone,
                     onPhoneChange = { phone = it },
                     regionCode = "+65",
                     onRegionCodeClick = onRegionCodeClick
                 )
-
-                // 密码 / 验证码输入框
                 PasswordInput(
                     password = password,
                     onPasswordChange = { password = it },
@@ -140,13 +138,12 @@ fun LoginPhoneScreen(
             // ── Forgot Password ───────────────────────────────────────────
             Text(
                 text = "Forgot Password?",
-                color = Color(0xFF666666),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
+                color = colors.secondaryTextColor,
+                style = typography.bodyLarge,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = onForgotPassword),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -157,32 +154,31 @@ fun LoginPhoneScreen(
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 /**
- * 顶部仅有关闭按钮的 TopBar
- * Figma: 编组 5 [HORIZONTAL] pad=T12R0B12L0，仅含 Frame 26（关闭按钮）
+ * 顶部关闭按钮 TopBar
  */
 @Composable
 private fun LoginPhoneTopBar(
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalAppColors.current
+    val typography = LocalTypography.current
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 关闭按钮 40×40 圆形 #e3e6e8
         Box(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFE3E6E8))
+                .background(colors.auxiliaryBackgroundColor)
                 .clickable(onClick = onClose),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "✕",
-                color = Color(0xFF333333),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
+                color = colors.primaryTextColor,
+                style = typography.titleSmall
             )
         }
     }
@@ -190,9 +186,7 @@ private fun LoginPhoneTopBar(
 
 /**
  * 手机号输入框（含区号选择）
- * Figma: 文本选中 382×60 [HORIZONTAL] gap=16 pad=T4R16B4L16 r=12 border=1px #000000
- *   - Frame 41（区号）: 62×24 r=4 bg=#e3e6e8 pad=H4V2
- *   - Frame 42（输入框）: 280×20 无背景
+ * Figma: 382×60 [HORIZONTAL] r=12 border=1px primaryTextColor
  */
 @Composable
 private fun PhoneNumberInput(
@@ -202,11 +196,13 @@ private fun PhoneNumberInput(
     onRegionCodeClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalAppColors.current
+    val typography = LocalTypography.current
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(60.dp)
-            .border(1.dp, Color(0xFF000000), RoundedCornerShape(12.dp))
+            .border(1.dp, colors.primaryTextColor, RoundedCornerShape(12.dp))
             .padding(horizontal = 16.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -214,13 +210,7 @@ private fun PhoneNumberInput(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            // 小标题
-            Text(
-                text = "Phone Number",
-                color = Color(0xFF999999),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Normal
-            )
+            Text(text = "Phone Number", color = colors.auxiliaryTextColor, style = typography.labelMedium)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -229,15 +219,14 @@ private fun PhoneNumberInput(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(4.dp))
-                        .background(Color(0xFFE3E6E8))
+                        .background(colors.auxiliaryBackgroundColor)
                         .clickable(onClick = onRegionCodeClick)
                         .padding(horizontal = 4.dp, vertical = 2.dp)
                 ) {
                     Text(
                         text = regionCode,
-                        color = Color(0xFF333333),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
+                        color = colors.primaryTextColor,
+                        style = typography.titleSmall
                     )
                 }
                 // 手机号输入
@@ -246,11 +235,11 @@ private fun PhoneNumberInput(
                     onValueChange = onPhoneChange,
                     modifier = Modifier.weight(1f),
                     textStyle = TextStyle(
-                        color = Color(0xFF333333),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Normal
+                        color = colors.primaryTextColor,
+                        fontSize = typography.bodyLarge.fontSize,
+                        fontWeight = typography.bodyLarge.fontWeight
                     ),
-                    cursorBrush = SolidColor(Color(0xFF333333)),
+                    cursorBrush = SolidColor(colors.primaryTextColor),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     singleLine = true,
                     decorationBox = { innerTextField ->
@@ -258,8 +247,8 @@ private fun PhoneNumberInput(
                             if (phone.isEmpty()) {
                                 Text(
                                     text = "Enter phone number",
-                                    color = Color(0xFFCCCCCC),
-                                    fontSize = 16.sp
+                                    color = colors.hintTextColor,
+                                    style = typography.bodyLarge
                                 )
                             }
                             innerTextField()
@@ -272,9 +261,8 @@ private fun PhoneNumberInput(
 }
 
 /**
- * 密码输入框
- * Figma: input/下拉框/线条FM 382×56 [VERTICAL] gap=4
- *        文本选中 [HORIZONTAL] gap=8 pad=T4R12B4L16 r=12 border=1px #000000
+ * 密码/验证码输入框
+ * Figma: 382×56 [HORIZONTAL] r=12 border=1px primaryTextColor
  */
 @Composable
 private fun PasswordInput(
@@ -284,11 +272,13 @@ private fun PasswordInput(
     onVisibilityToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalAppColors.current
+    val typography = LocalTypography.current
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
-            .border(1.dp, Color(0xFF000000), RoundedCornerShape(12.dp))
+            .border(1.dp, colors.primaryTextColor, RoundedCornerShape(12.dp))
             .padding(start = 16.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -298,11 +288,11 @@ private fun PasswordInput(
             onValueChange = onPasswordChange,
             modifier = Modifier.weight(1f),
             textStyle = TextStyle(
-                color = Color(0xFF333333),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal
+                color = colors.primaryTextColor,
+                fontSize = typography.bodyLarge.fontSize,
+                fontWeight = typography.bodyLarge.fontWeight
             ),
-            cursorBrush = SolidColor(Color(0xFF333333)),
+            cursorBrush = SolidColor(colors.primaryTextColor),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
             singleLine = true,
@@ -311,30 +301,29 @@ private fun PasswordInput(
                     if (password.isEmpty()) {
                         Text(
                             text = "Enter password / verification code",
-                            color = Color(0xFFCCCCCC),
-                            fontSize = 16.sp
+                            color = colors.hintTextColor,
+                            style = typography.bodyLarge
                         )
                     }
                     innerTextField()
                 }
             }
         )
-
-        // 显示/隐藏密码按钮
+        // 显示/隐藏密码
         Text(
             text = if (visible) "👁" else "👁‍🗨",
-            fontSize = 18.sp,
+            style = typography.titleMedium,
             modifier = Modifier
                 .size(20.dp)
                 .clickable(onClick = onVisibilityToggle),
-            color = Color(0xFF666666)
+            color = colors.secondaryTextColor
         )
     }
 }
 
 /**
  * Sign In 按钮
- * Figma: 按钮 382×48 圆角 full bg=#333333 文字白色 fs=18 fw=590
+ * Figma: 382×48 圆角 full bg=primaryTextColor 文字 primaryBackgroundColor
  */
 @Composable
 private fun SignInButton(
@@ -342,12 +331,14 @@ private fun SignInButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalAppColors.current
+    val typography = LocalTypography.current
     Surface(
         modifier = modifier
             .height(48.dp)
             .clip(CircleShape)
             .clickable(enabled = !isLoading, onClick = onClick),
-        color = Color(0xFF333333),
+        color = colors.primaryTextColor,
         shape = CircleShape
     ) {
         Box(
@@ -357,15 +348,14 @@ private fun SignInButton(
             if (isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
-                    color = Color.White,
+                    color = colors.primaryBackgroundColor,
                     strokeWidth = 2.dp
                 )
             } else {
                 Text(
                     text = "Sign In",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight(590)
+                    color = colors.primaryBackgroundColor,
+                    style = typography.titleLarge
                 )
             }
         }

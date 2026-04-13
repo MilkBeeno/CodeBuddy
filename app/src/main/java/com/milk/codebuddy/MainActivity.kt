@@ -12,17 +12,24 @@ import androidx.navigation.compose.rememberNavController
 import com.milk.codebuddy.base.ui.navigation.ProvideNavHostController
 import com.milk.codebuddy.base.ui.navigation.Splash
 import com.milk.codebuddy.base.ui.theme.AppTheme
-import com.milk.codebuddy.login.ui.navigation.loginScreen
-import com.milk.codebuddy.login.ui.navigation.splashScreen
-import com.milk.codebuddy.login.ui.navigation.registerScreen
+import com.milk.codebuddy.login.data.repository.AuthRepositoryProvider
 import com.milk.codebuddy.login.ui.navigation.forgotPasswordScreen
+import com.milk.codebuddy.login.ui.navigation.loginScreen
+import com.milk.codebuddy.login.ui.navigation.registerScreen
 import com.milk.codebuddy.login.ui.navigation.resetPasswordScreen
+import com.milk.codebuddy.login.ui.navigation.splashScreen
 import com.milk.codebuddy.main.ui.navigation.addTransactionScreen
 import com.milk.codebuddy.main.ui.navigation.mainScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 初始化认证仓库（接入真实 API 时替换 BASE_URL）
+        AuthRepositoryProvider.init(
+            context = applicationContext,
+            baseUrl = "https://api.example.com/",
+            isDebug = true
+        )
         enableEdgeToEdge()
         setContent {
             AppTheme {
@@ -47,11 +54,7 @@ fun AppNavigation() {
                 forgotPasswordScreen()
                 resetPasswordScreen()
                 mainScreen()
-                addTransactionScreen(
-                    onBack = {
-                        navController.popBackStack()
-                    }
-                )
+                addTransactionScreen()
             }
         )
     }

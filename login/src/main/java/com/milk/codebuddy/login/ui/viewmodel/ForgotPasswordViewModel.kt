@@ -1,33 +1,18 @@
 package com.milk.codebuddy.login.ui.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.milk.codebuddy.base.network.ApiResult
-import com.milk.codebuddy.login.data.local.SessionManager
-import com.milk.codebuddy.login.data.model.ForgotPasswordVerifyRequest
-import com.milk.codebuddy.login.data.model.LoginRequest
-import com.milk.codebuddy.login.data.model.LoginResponse
-import com.milk.codebuddy.login.data.model.RegisterRequest
-import com.milk.codebuddy.login.data.model.ResetPasswordRequest
-import com.milk.codebuddy.login.data.model.SendCodeRequest
-import com.milk.codebuddy.login.data.model.SendCodeResponse
-import com.milk.codebuddy.login.data.remote.LoginApi
+import com.milk.codebuddy.base.utils.countdownFlow
 import com.milk.codebuddy.login.data.repository.AuthRepository
-import com.milk.codebuddy.login.data.repository.AuthRepositoryImpl
 import com.milk.codebuddy.login.ui.state.ForgotPasswordEffect
 import com.milk.codebuddy.login.ui.state.ForgotPasswordState
 import com.milk.codebuddy.login.ui.state.ForgotPasswordUiState
 import com.milk.codebuddy.resource.R as ResourceR
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -36,26 +21,23 @@ import java.util.regex.Pattern
 /**
  * 忘记密码 ViewModel（MVI 架构）
  * 流程：输入手机号 → 发送验证码 → 验证通过 → 跳转重置密码页
+ *
+ * - 依赖通过构造器注入，由 [AuthViewModelFactory] 提供
  */
-class ForgotPasswordViewModel(application: Application) : AndroidViewModel(application) {
+class ForgotPasswordViewModel(
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     companion object {
         private const val PHONE_REGEX = "^1[3-9]\\d{9}$"
         private const val COUNTDOWN_SECONDS = 60
     }
 
-    private val sessionManager = SessionManager(application)
-    private val authRepository: AuthRepository
-
     private val _uiState = MutableStateFlow(ForgotPasswordUiState())
     val uiState: StateFlow<ForgotPasswordUiState> = _uiState.asStateFlow()
 
     private val _effect = Channel<ForgotPasswordEffect>()
     val effect = _effect.receiveAsFlow()
-
-    init {
-        authRepository = AuthRepositoryImpl(createMockLoginApi(), sessionManager)
-    }
 
     fun onPhoneChange(phone: String) {
         _uiState.update {
@@ -142,17 +124,9 @@ class ForgotPasswordViewModel(application: Application) : AndroidViewModel(appli
     private fun startCountdown() {
         viewModelScope.launch {
             _uiState.update { it.copy(countdownSeconds = COUNTDOWN_SECONDS, isCountingDown = true) }
-            flow {
-                repeat(COUNTDOWN_SECONDS) { elapsed ->
-                    emit(COUNTDOWN_SECONDS - elapsed - 1)
-                    delay(1000L)
-                }
+            countdownFlow(COUNTDOWN_SECONDS).collect { remaining ->
+                _uiState.update { it.copy(countdownSeconds = remaining) }
             }
-                .flowOn(Dispatchers.Default)
-                .catch { /* 静默处理 */ }
-                .collect { remaining ->
-                    _uiState.update { it.copy(countdownSeconds = remaining) }
-                }
             _uiState.update { it.copy(isCountingDown = false) }
         }
     }
@@ -165,33 +139,5 @@ class ForgotPasswordViewModel(application: Application) : AndroidViewModel(appli
         -1 -> ResourceR.string.forgot_password_error_timeout
         -2, -3 -> ResourceR.string.forgot_password_error_network
         else -> ResourceR.string.forgot_password_error_unknown
-    }
-
-    private fun createMockLoginApi(): LoginApi = object : LoginApi {
-        override suspend fun sendCode(request: SendCodeRequest): SendCodeResponse {
-            delay(1000)
-            return SendCodeResponse(code = 200, message = "success", data = true)
-        }
-
-        override suspend fun login(request: LoginRequest): LoginResponse =
-            LoginResponse(code = 200, message = "success", data = null)
-
-        override suspend fun refreshToken(refreshToken: Map<String, String>): LoginResponse =
-            LoginResponse(code = 200, message = "success", data = null)
-
-        override suspend fun register(request: RegisterRequest): SendCodeResponse {
-            delay(1000)
-            return SendCodeResponse(code = 200, message = "success", data = true)
-        }
-
-        override suspend fun forgotPasswordVerify(request: ForgotPasswordVerifyRequest): SendCodeResponse {
-            delay(1000)
-            return SendCodeResponse(code = 200, message = "success", data = true)
-        }
-
-        override suspend fun resetPassword(request: ResetPasswordRequest): SendCodeResponse {
-            delay(1000)
-            return SendCodeResponse(code = 200, message = "success", data = true)
-        }
     }
 }
