@@ -4,17 +4,9 @@ alwaysApply: true
 enabled: true
 ---
 
-# Paging 3 分页规范（base 模块）
+# PPaging 3 分页库开发规范 (MAD Architecture)
 
-> 分页统一使用 Jetpack Paging 3，基础设施封装在 `base/paging/`，**禁止**业务模块自建分页模板代码或手动维护页码状态。
-
-```
-base/paging/
-├── BasePagingSource.kt   # 通用 PagingSource 封装（错误处理 + getRefreshKey）
-└── PagingExt.kt          # Pager 构建扩展函数，统一 PagingConfig 默认参数
-```
-
----
+本规范定义了在处理大规模数据集时，如何实现高性能、响应式且具备错误处理机制的分页加载。我们坚持 协程流 (Flow) 与 三层架构 的深度集成。
 
 ## 一、依赖配置
 
@@ -40,77 +32,90 @@ dependencies {
 
 ---
 
-## 二、BasePagingSource（base 封装）
+## 二、核心技术规范
 
-所有纯网络分页继承 `BasePagingSource`，统一处理 `getRefreshKey` 和异常捕获。
+### 数据流架构
+- **单一数据流**：分页数据必须以 `Flow<PagingData<T>>` 的形式从 `Repository` 层向 UI 层传递。
+- **作用域绑定**：必须使用 `cachedIn(viewModelScope)`。这能确保在配置更改（如屏幕旋转）时，分页状态得以保留，且避免数据重复加载。
 
-```kotlin
-// base/paging/BasePagingSource.kt
-abstract class BasePagingSource<T : Any> : PagingSource<Int, T>() {
+### 数据源选型 (PagingSource)
+- **唯一真实数据源 (SSOT)**：如果应用支持离线模式，必须使用 `Room + RemoteMediator` 方案。UI 只观察 Room 的分页数据。
+- **Key 类型**：网络分页通常使用 `Int` (页码)；对于无限滚动流，推荐使用 `String` (游标/`Cursor`)。
 
-    override fun getRefreshKey(state: PagingState<Int, T>) =
-        state.anchorPosition?.let { state.closestPageToPosition(it)?.prevKey?.plus(1) }
-
-    abstract suspend fun fetchPage(page: Int, pageSize: Int): List<T>
-
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, T> {
-        val page = params.key ?: 1
-        return try {
-            val items = fetchPage(page, params.loadSize)
-            LoadResult.Page(
-                data    = items,
-                prevKey = if (page == 1) null else page - 1,
-                nextKey = if (items.isEmpty()) null else page + 1
-            )
-        } catch (e: Exception) {
-            LoadResult.Error(e)
-        }
-    }
-}
-```
-
-### 业务 PagingSource 示例
-
-```kotlin
-class UserPagingSource @Inject constructor(
-    private val service: UserService
-) : BasePagingSource<UserEntity>() {
-    override suspend fun fetchPage(page: Int, pageSize: Int) =
-        service.getUsers(page, pageSize).map { it.toDomain() }
-}
-```
+### UI 适配器
+- **PagingDataAdapter**：必须使用 `PagingDataAdapter` 以获得内置的 `DiffUtil` 差分更新支持。
+- **状态监听**：必须通过 `loadStateFlow` 或 `addLoadStateListener` 处理加载中、空状态和错误状态。
 
 ---
 
-## 三、PagingExt（base 封装）
+## 三、约束与原则
 
-统一 `PagingConfig` 默认参数，业务代码通过扩展函数构建 `Pager`。
+### 性能约束
+- **禁止在 UI 层过滤**：所有的 `filter`、`map` 转换必须在 `Flow<PagingData>` 发射前通过 `Paging` 库提供的 `map` 或 `filter` 操作符完成。
+- **预加载优化**：根据业务需求合理配置 `PagingConfig` 的 `prefetchDistance`（预取距离），默认值为 `pageSize`。
 
-```kotlin
-// base/paging/PagingExt.kt
-fun <T : Any> buildPager(
-    pageSize: Int = 20,
-    prefetchDistance: Int = pageSize,
-    source: () -> PagingSource<Int, T>
-): Flow<PagingData<T>> =
-    Pager(PagingConfig(pageSize = pageSize, prefetchDistance = prefetchDistance)) { source() }.flow
+### 错误处理
+- **重试机制**：每个分页列表必须提供“点击重试”功能，调用 `adapter.retry()`。
+- **异常捕获**：在 `PagingSource` 的 `load` 方法中，必须使用 `try-catch` 包裹请求，并返回 `LoadResult.Error(e)`。
 
-@OptIn(ExperimentalPagingApi::class)
-fun <T : Any> buildPagerWithMediator(
-    pageSize: Int = 20,
-    mediator: RemoteMediator<Int, T>,
-    source: () -> PagingSource<Int, T>
-): Flow<PagingData<T>> =
-    Pager(PagingConfig(pageSize = pageSize), remoteMediator = mediator) { source() }.flow
-```
+### 转换解耦
+- **禁止 Entity 穿透**：`PagingSource` 加载的数据库/网络 `Entity` 必须在 `Repository` 层转换为 `Domain Model`。
 
 ---
 
-## 四、RemoteMediator（离线优先）
+## 四、Agent 工作流
 
 网络数据写入 Room，UI 始终观察本地数据库。
 
+1. **创建 PagingSource**：实现 `load` 函数，处理 `Key` 的递增/递减。
+2. **定义 RemoteMediator (可选)**：如果需要网络+本地缓存，编写协调逻辑。
+3. **构建 Pager**：在 `Repository` 中配置 `PagingConfig` 并返回 `Flow`。
+4. **ViewModel 缓存**：调用 `cachedIn(viewModelScope)`。
+5. **UI 绑定**：创建 `PagingDataAdapter` 并将 `LoadState` 绑定到 `ProgressBar/ErrorView`。
+
+---
+
+## 五、见指令参考
+
+- **下拉刷新**：直接调用 `adapter.refresh()`。
+- **空数据处理**：监听 `loadState.refresh is LoadState.NotLoading && adapter.itemCount == 0`。
+- **追加 Header/Footer**：使用 `adapter.withLoadStateHeaderAndFooter(...)` 快速添加加载进度条。
+- **本地更新**：如果需要局部修改列表项（如点赞），应在数据库层修改 `Entity`，触发 `Room` 的分页流自动刷新，而不是手动操作 `Adapter` 数据。
+
 ```kotlin
+// ViewModel 中调用
+@HiltViewModel
+class UserViewModel @Inject constructor(
+    private val source: UserPagingSource          // 纯网络
+    // private val mediator: UserRemoteMediator   // 离线优先
+    // private val dao: UserDao
+) : ViewModel() {
+
+    // 纯网络
+    val pagingFlow = buildPager { source }.cachedIn(viewModelScope)
+
+    // 离线优先
+    // val pagingFlow = buildPagerWithMediator(mediator = mediator) { dao.pagingSource() }
+    //     .cachedIn(viewModelScope)
+}
+
+// Pager 加载数据直接返回
+class ArticleRepository @Inject constructor(
+    private val service: ApiService
+) {
+    fun getArticles(): Flow<PagingData<Article>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                enablePlaceholders = false,
+                initialLoadSize = 20
+            ),
+            pagingSourceFactory = { ArticlePagingSource(service) }
+        ).flow
+    }
+}
+
+// Pageer 加载数据存到本地中更新
 @OptIn(ExperimentalPagingApi::class)
 class UserRemoteMediator @Inject constructor(
     private val service: UserService,
@@ -139,103 +144,13 @@ class UserRemoteMediator @Inject constructor(
 }
 ```
 
-- `REFRESH` 时必须清空旧数据，数据库操作必须包裹在 `db.withTransaction {}`
-- `PREPEND` 固定返回 `endOfPaginationReached = true`
-
 ---
 
-## 五、ViewModel
+## 六、性能与测试
 
-```kotlin
-@HiltViewModel
-class UserViewModel @Inject constructor(
-    private val source: UserPagingSource          // 纯网络
-    // private val mediator: UserRemoteMediator   // 离线优先
-    // private val dao: UserDao
-) : ViewModel() {
-
-    // 纯网络
-    val pagingFlow = buildPager { source }.cachedIn(viewModelScope)
-
-    // 离线优先
-    // val pagingFlow = buildPagerWithMediator(mediator = mediator) { dao.pagingSource() }
-    //     .cachedIn(viewModelScope)
-}
-```
-
-- `cachedIn(viewModelScope)` 必须添加，防止屏幕旋转重新请求
-- 禁止在 ViewModel 中手动维护 `page` 变量
-
----
-
-## 六、UI 层（Compose）
-
-```kotlin
-val items = viewModel.pagingFlow.collectAsLazyPagingItems()
-
-LazyColumn {
-    items(items, key = { it.id }) { user ->
-        if (user != null) UserCard(user)
-    }
-    item {
-        when (val s = items.loadState.append) {
-            is LoadState.Loading -> CircularProgressIndicator(Modifier.fillMaxWidth().wrapContentWidth())
-            is LoadState.Error   -> RetryButton { items.retry() }
-            else -> Unit
-        }
-    }
-}
-
-// 首次加载失败
-if (items.loadState.refresh is LoadState.Error) {
-    ErrorScreen { items.refresh() }
-}
-```
-
-- `key` 必须使用 Entity 主键，禁止使用 `index`
-- 占位符为 `null` 时必须处理
-- 必须同时处理 `refresh`（首次）和 `append`（追加）两种错误态
-
----
-
-## 七、搜索 / 过滤分页
-
-```kotlin
-val query = MutableStateFlow("")
-
-val pagingFlow = query
-    .debounce(300)
-    .distinctUntilChanged()
-    .flatMapLatest { q -> buildPager { SearchPagingSource(service, q) } }
-    .cachedIn(viewModelScope)
-```
-
----
-
-## 八、测试
-
-```kotlin
-@Test fun `load returns correct page`() = runTest {
-    val source = UserPagingSource(fakeService)
-    val result = source.load(
-        PagingSource.LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false)
-    )
-    assertIs<PagingSource.LoadResult.Page<Int, UserEntity>>(result)
-    assertEquals(20, result.data.size)
-    assertNull(result.prevKey)
-}
-```
-
----
-
-## 九、禁止事项
-
-| 禁止行为                                                         | 原因                  |
-|--------------------------------------------------------------|---------------------|
-| 手动维护 `page` / `offset` 变量                                    | Paging 3 已内置        |
-| 直接继承 `PagingSource` 而非 `BasePagingSource`                    | 绕过统一错误处理            |
-| 直接调用 `Pager(...)` 而非 `buildPager` / `buildPagerWithMediator` | 绕过统一 `PagingConfig` |
-| 不加 `cachedIn(viewModelScope)`                                | 旋转屏幕会重新请求           |
-| `LazyColumn` 的 `key` 使用 `index`                              | 数据变化时动画错乱           |
-| `RemoteMediator` 的 `REFRESH` 不清空旧数据                          | 产生重复数据              |
-| ViewModel 暴露 `List<T>` 而非 `Flow<PagingData<T>>`              | 失去增量加载能力            |
+* `REFRESH` 时必须清空旧数据，数据库操作必须包裹在 `db.withTransaction {}`。
+* `PREPEND` 固定返回 `endOfPaginationReached = true`。
+* `cachedIn(viewModelScope)` 必须添加，防止屏幕旋转重新请求。
+* 禁止在 ViewModel 中手动维护 `page` 变量。
+* 禁止直接调用 `Pager(...)` 而非 `buildPager` / `buildPagerWithMediator`、绕过统一 `PagingConfig`。
+* 禁止 ViewModel 暴露 `List<T>` 而非 `Flow<PagingData<T>>`，失去增量加载能力。

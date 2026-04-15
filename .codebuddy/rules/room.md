@@ -126,7 +126,7 @@ interface ProductDao {
 
 ### 数据库配置与类型转换
 
-* **类型转换器 (TypeConverters)**：Room 不支持存自定义对象（如 `Date` 或 `List`）。你需要将其序列化为基础类型
+* **类型转换器 (TypeConverters)**：Room 不支持存自定义对象（如 `Date` 或 `List`），你需要将其序列化为基础类型。
 
 ```kotlin
 class Converters {
@@ -152,8 +152,8 @@ abstract class AppDatabase : RoomDatabase() {
 ## 六、性能与测试
 
 * **测试**：开启 `room.schemaLocation` 导出 JSON。
-* **单例模式**：禁止多处调用 `databaseBuilder`
-* **用户数据丢失**：禁止 `fallbackToDestructiveMigration()` 用于线上
-* **索引 (Indexing)**：对经常出现在 `WHERE` 子句或 `ORDER BY` 里的字段务必添加索引，否则全表扫描会拖慢 UI 响应
+* **单例模式**：禁止多处调用 `databaseBuilder`。
+* **用户数据丢失**：禁止 `fallbackToDestructiveMigration()` 用于线上。
+* **索引 (Indexing)**：对经常出现在 `WHERE` 子句或 `ORDER BY` 里的字段务必添加索引，否则全表扫描会拖慢 UI 响应。
 * **DAO 投影**：如果 UI 只需要 `title` 字段，不要查询 SELECT *。定义一个只包含所需字段的小类，Room 会自动映射。
-* **批量处理**：如果你要插入 100 条数据，不要写循环调用 `insert()`，请在 `DAO` 中定义 `suspend fun insertAll(list: List<T>)`
+* **批量处理**：如果你要插入 100 条数据，不要写循环调用 `insert()`，请在 `DAO` 中定义 `suspend fun insertAll(list: List<T>)`。
