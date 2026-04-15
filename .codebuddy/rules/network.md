@@ -37,7 +37,7 @@ network-okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-inter
 ### OkHttp 拦截器 (Interceptors)
 
 - **日志拦截器**：仅在 DEBUG 模式下启用 `HttpLoggingInterceptor`。
-- **头部参数拦截器**：添加网络请求公用头部信息 `HeaderLoggingInterceptor`。
+- **头部参数拦截器**：添加网络请求公用头部信息 （`Authorization` / `App-Version` / `Platform`）`HeaderLoggingInterceptor`。
 - **Auth 拦截器**：统一处理 `Token` 注入、刷新机制以及 401 状态码 `AuthInterceptor`。
 - **超时配置**：`Connect/Read/Write` 超时时间原则上不应超过 20 秒。
 
@@ -81,10 +81,9 @@ network-okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-inter
 - **取消请求**：由于使用了协程，只需调用 `Job.cancel()` 即可。
 - **并发请求**：使用 zip 操作符合并两个网络流，或使用 `async/await` 处理多个并行请求。
 
-### 通用请求包装函数
+### safeApiCall
 
 ```kotlin
-// 在 BaseRepository 中定义
 suspend fun <T> safeApiCall(
     apiCall: suspend () -> T
 ): Flow<Result<T>> = flow {
@@ -101,9 +100,7 @@ suspend fun <T> safeApiCall(
 ```kotlin
 interface ApiService {
     @GET("users/{id}")
-    suspend fun getUserProfile(
-        @Path("id") userId: String
-    ): UserResponse
+    suspend fun getUserProfile(@Path("id") userId: String): UserResponse
 }
 ```
 

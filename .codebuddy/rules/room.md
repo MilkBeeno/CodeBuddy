@@ -127,14 +127,23 @@ interface ProductDao {
 ### 数据库配置与类型转换
 
 * **类型转换器 (TypeConverters)**：Room 不支持存自定义对象（如 `Date` 或 `List`），你需要将其序列化为基础类型。
+- 新增 Converter 追加到 `CommonConverters.kt`，禁止分散到业务模块
 
 ```kotlin
 class Converters {
+    private val gson = Gson()
+    
     @TypeConverter
     fun fromTimestamp(value: Long?): Date? = value?.let { Date(it) }
-
+    
     @TypeConverter
     fun dateToTimestamp(date: Date?): Long? = date?.time
+    
+    @TypeConverter 
+    fun fromStringList(v: List<String>?): String = gson.toJson(v ?: emptyList<String>())
+    
+    @TypeConverter 
+    fun toStringList(v: String): List<String> = gson.fromJson(v, object : TypeToken<List<String>>() {}.type) ?: emptyList()
 }
 ```
 
@@ -147,6 +156,40 @@ abstract class AppDatabase : RoomDatabase() {
 }
 ```
 
+### AppDatabase
+
+```kotlin
+@Database(entities = [UserEntity::class], version = 1, exportSchema = true)
+@TypeConverters(CommonConverters::class)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun userDao(): UserDao
+    companion object { const val NAME = "app_database" }
+}
+
+@Module @InstallIn(SingletonComponent::class)
+object DatabaseModule {
+    @Provides @Singleton
+    fun provideDb(@ApplicationContext ctx: Context): AppDatabase =
+        Room.databaseBuilder(ctx, AppDatabase::class.java, AppDatabase.NAME)
+            .fallbackToDestructiveMigrationOnDowngrade(true)
+            .build()
+
+    @Provides fun provideUserDao(db: AppDatabase): UserDao = db.userDao()
+}
+```
+
+### Migration
+
+- 线上版本**禁止** `fallbackToDestructiveMigration()`，必须编写 `Migration`。
+
+```kotlin
+// AppDatabase.companion object
+val MIGRATION_1_2 = object : Migration(1, 2) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE user ADD COLUMN bio TEXT NOT NULL DEFAULT ''")
+    }
+}
+```
 ---
 
 ## 六、性能与测试
