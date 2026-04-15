@@ -8,6 +8,8 @@ enabled: true
 
 本规范定义了在处理大规模数据集时，如何实现高性能、响应式且具备错误处理机制的分页加载。我们坚持 协程流 (Flow) 与 三层架构 的深度集成。
 
+---
+
 ## 一、依赖配置
 
 ```toml
@@ -35,14 +37,17 @@ dependencies {
 ## 二、核心技术规范
 
 ### 数据流架构
+
 - **单一数据流**：分页数据必须以 `Flow<PagingData<T>>` 的形式从 `Repository` 层向 UI 层传递。
 - **作用域绑定**：必须使用 `cachedIn(viewModelScope)`。这能确保在配置更改（如屏幕旋转）时，分页状态得以保留，且避免数据重复加载。
 
 ### 数据源选型 (PagingSource)
+
 - **唯一真实数据源 (SSOT)**：如果应用支持离线模式，必须使用 `Room + RemoteMediator` 方案。UI 只观察 Room 的分页数据。
 - **Key 类型**：网络分页通常使用 `Int` (页码)；对于无限滚动流，推荐使用 `String` (游标/`Cursor`)。
 
 ### UI 适配器
+
 - **PagingDataAdapter**：必须使用 `PagingDataAdapter` 以获得内置的 `DiffUtil` 差分更新支持。
 - **状态监听**：必须通过 `loadStateFlow` 或 `addLoadStateListener` 处理加载中、空状态和错误状态。
 
@@ -51,14 +56,17 @@ dependencies {
 ## 三、约束与原则
 
 ### 性能约束
+
 - **禁止在 UI 层过滤**：所有的 `filter`、`map` 转换必须在 `Flow<PagingData>` 发射前通过 `Paging` 库提供的 `map` 或 `filter` 操作符完成。
 - **预加载优化**：根据业务需求合理配置 `PagingConfig` 的 `prefetchDistance`（预取距离），默认值为 `pageSize`。
 
 ### 错误处理
+
 - **重试机制**：每个分页列表必须提供“点击重试”功能，调用 `adapter.retry()`。
 - **异常捕获**：在 `PagingSource` 的 `load` 方法中，必须使用 `try-catch` 包裹请求，并返回 `LoadResult.Error(e)`。
 
 ### 转换解耦
+
 - **禁止 Entity 穿透**：`PagingSource` 加载的数据库/网络 `Entity` 必须在 `Repository` 层转换为 `Domain Model`。
 
 ---

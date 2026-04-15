@@ -6,7 +6,7 @@ enabled: true
 
 # Android MAD 技术栈规范
 
-> 坚持 UDF + 响应式编程，代码须类型安全、零 Warning。
+坚持 UDF + 响应式编程，代码须类型安全、零 Warning。
 
 ---
 

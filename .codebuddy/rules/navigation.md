@@ -28,14 +28,17 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 ## 二、核心技术规范
 
 ### 类型安全导航 (Type-Safety)
+
 * **拒绝硬编码**： `Route` 严禁使用 `String` 拼接路径。必须使用 `Navigation 2.8.0+` 引入的 `Kotlin Serialization` 进行类型安全导航。
 * **定义路由类**：每个页面必须对应一个 `@Serializable` 的 `data class` 或 `object`。
 
 ### 导航控制器管理
+
 * **单例 NavHost**：每个 `Activity` 原则上只持有一个 `NavHost`。
 * **依赖注入**：`NavController` 不应直接注入到 `Repository` 或 `Domain` 层，它属于 UI 层的导航组件。
 
 ### 状态管理
+
 * **ViewModel 作用域**：利用 `navGraphViewModels(regId)` 在多个关联页面间共享 `ViewModel`。
 * **返回栈控制**：必须明确使用 `popUpTo` 和 `inclusive` 来清理不必要的返回栈，防止 OOM 和逻辑错误。
 
@@ -44,18 +47,22 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 ## 三、约束与原则
 
 ### 导航逻辑位置
+
 - 逻辑在 ViewModel：执行在 UI：`ViewModel` 负责决定“去哪”，通过 `Channel` 或 `SharedFlow` 发送事件，`Fragment/Composable` 负责执行 `navController.navigate()`。
 
 ### DeepLink 规范
+
 - **统一入口**：所有外部跳转必须通过 `navDeepLink` 统一注册。
 - **参数校验**：`DeepLink` 进入页面后，必须在 `ViewModel` 初始化时对参数进行合法性校验。
 
 ### 动画与交互
+
 - **统一转场**：必须在 `NavOptions` 中统一定义全局的 `enter/exit` 动画，保持视觉一致性。
 
 ---
 
 ## 四、Agent 工作流 (代码生成规范)
+
 1. **定义路由**：使用 `@Serializable` 创建目标页面模型。
 2. **构建图谱**：在 `NavHost` 中使用 `composable<T>` 或 `fragment<T>` 注册页面。
 3. **参数传递**：利用 `navArgs` 委托属性在目标页面获取参数。
