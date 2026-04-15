@@ -1,6 +1,6 @@
 ---
 description: Android Room 数据库封装规范，定义 Entity、DAO、Database、Migration、Repository 的准则与代码模板，所有业务模块必须遵守
-alwaysApply: false
+alwaysApply: true
 enabled: true
 ---
 
