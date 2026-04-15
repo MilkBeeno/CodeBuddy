@@ -493,18 +493,35 @@ WelcomeScreen（注册完成欢迎页）
 
 ### 忘记密码流程
 ```
-ForgotPasswordScreen
-  ├─ 输入邮箱 + 验证码
-  └─ 点击「下一步」→ authRepository.forgotPasswordVerify(email, code)
-       成功 → ForgotPasswordEffect.NavigateToResetPassword(email)
-            → navigate(ResetPassword(email)) { launchSingleTop = true }
+ForgotPasswordScreen（页内 Tab 切换：邮箱验证 / 手机号验证）
+  ├─ Tab「Email」（默认选中）
+  │    ├─ 输入邮箱
+  │    ├─ 点击「Send Code」→ authRepository.forgotPasswordSendCode(type="email", email=...)
+  │    │    成功 → 按钮进入倒计时（60s），可 Resend
+  │    ├─ 输入验证码
+  │    └─ 点击「Next」→ authRepository.forgotPasswordVerify(type="email", identifier=email, code)
+  │         成功（返回 resetToken）→ ForgotPasswordEffect.NavigateToResetPassword(resetToken)
+  │              → navigate(ResetPassword(resetToken)) { launchSingleTop = true }
+  │
+  └─ Tab「Phone」
+       ├─ 区号选择器（默认 +86），点击触发区号弹窗（同手机号登录页弹窗）
+       ├─ 输入手机号（纯数字，不含区号）
+       ├─ 点击「Send Code」→ authRepository.forgotPasswordSendCode(type="phone", areaCode=..., phoneNumber=...)
+       │    成功 → 按钮进入倒计时（60s），可 Resend
+       ├─ 输入验证码
+       └─ 点击「Next」→ authRepository.forgotPasswordVerify(type="phone", identifier=areaCode+phoneNumber, code)
+            成功（返回 resetToken）→ ForgotPasswordEffect.NavigateToResetPassword(resetToken)
+                 → navigate(ResetPassword(resetToken)) { launchSingleTop = true }
 
-ResetPasswordScreen（接收 email 参数）
-  ├─ ViewModel 通过 savedStateHandle.toRoute<ResetPassword>().email 获取 email
-  ├─ 输入新密码 + 确认密码（同密码规则：3-30位，2种字符类型）
-  └─ 点击「提交」→ authRepository.resetPassword(email, newPassword, confirmPassword)
+ResetPasswordScreen（接收 resetToken 参数）
+  ├─ ViewModel 通过 savedStateHandle.toRoute<ResetPassword>().resetToken 获取 resetToken
+  ├─ 输入新密码（含显示/隐藏切换）
+  ├─ 输入确认密码（含显示/隐藏切换）
+  ├─ 实时展示密码规则提示（同注册设置密码页规则：3-30位，2种字符类型）
+  ├─ 两次密码不一致时展示错误提示
+  └─ 点击「Reset Password」→ authRepository.resetPassword(resetToken, newPassword)
        成功 → ResetPasswordEffect.ShowToast + ResetPasswordEffect.NavigateToEmailLogin
-            → navigate(EmailLogin) { popUpTo(ForgotPassword) { inclusive = true } }
+            → navigate(EmailLogin) { popUpTo(ForgotPassword) { inclusive = true }; launchSingleTop = true }
 ```
 
 ---
@@ -565,5 +582,237 @@ fun onPhoneNumberChange(phone: String) {
 }
 fun onPasswordChange(password: String) {
     _uiState.update { it.copy(password = password, passwordError = null) }
+}
+```
+
+---
+
+## 13. ForgotPasswordUiState（找回密码，页内邮箱/手机号切换）
+
+找回密码页通过 Tab 在邮箱验证和手机号验证间切换，两种方式共用同一个 ViewModel 和 UiState，通过 `verifyType` 区分当前激活的验证方式。
+
+```kotlin
+@Immutable
+data class ForgotPasswordUiState(
+    // 当前验证方式
+    val verifyType: ForgotPasswordVerifyType = ForgotPasswordVerifyType.Email,
+
+    // 邮箱验证字段
+    val email: String = "",
+    val emailCode: String = "",
+    val emailError: Int? = null,
+    val emailCodeError: Int? = null,
+    val isEmailCountingDown: Boolean = false,
+    val emailCountdownSeconds: Int = 0,
+    val isSendingEmailCode: Boolean = false,
+
+    // 手机号验证字段
+    val areaCode: String = "+86",
+    val phoneNumber: String = "",
+    val phoneCode: String = "",
+    val phoneNumberError: Int? = null,
+    val phoneCodeError: Int? = null,
+    val isPhoneCountingDown: Boolean = false,
+    val phoneCountdownSeconds: Int = 0,
+    val isSendingPhoneCode: Boolean = false,
+
+    // 区号弹窗可见性（手机号验证 Tab 使用）
+    val isAreaCodeDialogVisible: Boolean = false,
+
+    // 请求状态
+    val isLoading: Boolean = false,
+    val forgotPasswordState: ForgotPasswordState = ForgotPasswordState.Idle
+) {
+    val canSendEmailCode: Boolean
+        get() = email.isValidEmail() && !isEmailCountingDown && !isSendingEmailCode
+
+    val canSendPhoneCode: Boolean
+        get() = phoneNumber.isValidPhone() && !isPhoneCountingDown && !isSendingPhoneCode
+
+    val canSubmitEmail: Boolean
+        get() = email.isValidEmail() && emailCode.length == 6 && !isLoading
+
+    val canSubmitPhone: Boolean
+        get() = phoneNumber.isValidPhone() && phoneCode.length == 6 && !isLoading
+}
+
+enum class ForgotPasswordVerifyType { Email, Phone }
+
+sealed class ForgotPasswordState {
+    data object Idle : ForgotPasswordState()
+    data object Loading : ForgotPasswordState()
+    data object Success : ForgotPasswordState()
+    data class Error(val messageResId: Int) : ForgotPasswordState()
+}
+
+sealed class ForgotPasswordEffect {
+    data class NavigateToResetPassword(val resetToken: String) : ForgotPasswordEffect()
+    data class ShowToast(val messageResId: Int) : ForgotPasswordEffect()
+}
+```
+
+**ViewModel 关键操作：**
+```kotlin
+// 切换验证方式（Tab）
+fun onVerifyTypeChange(type: ForgotPasswordVerifyType) {
+    _uiState.update { it.copy(verifyType = type) }
+}
+
+// 邮箱输入
+fun onEmailChange(email: String) {
+    _uiState.update { it.copy(email = email.trim(), emailError = null) }
+}
+
+// 邮箱验证码输入
+fun onEmailCodeChange(code: String) {
+    _uiState.update { it.copy(emailCode = code.filter { c -> c.isDigit() }.take(6), emailCodeError = null) }
+}
+
+// 发送邮箱验证码
+fun onSendEmailCodeClick() {
+    val email = _uiState.value.email
+    if (!email.isValidEmail()) {
+        _uiState.update { it.copy(emailError = ResourceR.string.forgot_email_error_format) }
+        return
+    }
+    viewModelScope.launch {
+        authRepository.forgotPasswordSendCode(type = "email", email = email).collect { result ->
+            when (result) {
+                is ApiResult.Loading -> _uiState.update { it.copy(isSendingEmailCode = true) }
+                is ApiResult.Success -> {
+                    _uiState.update { it.copy(isSendingEmailCode = false) }
+                    startEmailCountdown()
+                }
+                is ApiResult.Error -> _uiState.update {
+                    it.copy(isSendingEmailCode = false, forgotPasswordState = ForgotPasswordState.Error(getErrorMessageRes(result.code)))
+                }
+            }
+        }
+    }
+}
+
+// 手机号验证码 + 区号弹窗操作（与 PhoneLoginViewModel 模式相同）
+fun onShowAreaCodeDialog() { _uiState.update { it.copy(isAreaCodeDialogVisible = true) } }
+fun onDismissAreaCodeDialog() { _uiState.update { it.copy(isAreaCodeDialogVisible = false) } }
+fun onAreaCodeSelected(areaCode: String) {
+    _uiState.update { it.copy(areaCode = areaCode, isAreaCodeDialogVisible = false) }
+}
+fun onPhoneNumberChange(phone: String) {
+    _uiState.update { it.copy(phoneNumber = phone.filter { c -> c.isDigit() }.take(15), phoneNumberError = null) }
+}
+fun onPhoneCodeChange(code: String) {
+    _uiState.update { it.copy(phoneCode = code.filter { c -> c.isDigit() }.take(6), phoneCodeError = null) }
+}
+
+// 提交（根据当前 verifyType 调用对应接口）
+fun onSubmitClick() {
+    if (_uiState.value.isLoading) return
+    viewModelScope.launch {
+        val state = _uiState.value
+        val flow = when (state.verifyType) {
+            ForgotPasswordVerifyType.Email ->
+                authRepository.forgotPasswordVerify(type = "email", identifier = state.email, code = state.emailCode)
+            ForgotPasswordVerifyType.Phone ->
+                authRepository.forgotPasswordVerify(type = "phone", identifier = "${state.areaCode}${state.phoneNumber}", code = state.phoneCode)
+        }
+        flow.collect { result ->
+            when (result) {
+                is ApiResult.Loading -> _uiState.update { it.copy(isLoading = true, forgotPasswordState = ForgotPasswordState.Loading) }
+                is ApiResult.Success -> {
+                    _uiState.update { it.copy(isLoading = false, forgotPasswordState = ForgotPasswordState.Success) }
+                    _effect.send(ForgotPasswordEffect.NavigateToResetPassword(result.data.resetToken))
+                }
+                is ApiResult.Error -> _uiState.update {
+                    it.copy(isLoading = false, forgotPasswordState = ForgotPasswordState.Error(getErrorMessageRes(result.code)))
+                }
+            }
+        }
+    }
+}
+```
+
+---
+
+## 14. ResetPasswordUiState（重置密码）
+
+重置密码页通过路由接收服务端返回的 `resetToken`，密码规则与注册设置密码页相同（3-30位，2种字符类型），额外校验两次密码一致性。
+
+```kotlin
+@Immutable
+data class ResetPasswordUiState(
+    val newPassword: String = "",
+    val newPasswordVisible: Boolean = false,
+    val confirmPassword: String = "",
+    val confirmPasswordVisible: Boolean = false,
+
+    // 字段错误
+    val newPasswordError: Int? = null,
+    val confirmPasswordError: Int? = null,
+
+    // 请求状态
+    val isLoading: Boolean = false,
+    val resetPasswordState: ResetPasswordState = ResetPasswordState.Idle
+) {
+    // 密码规则（与注册设置密码一致）
+    val isLengthValid: Boolean get() = newPassword.length in 3..30
+    val charTypeCount: Int get() = listOf(
+        newPassword.any { it.isUpperCase() },
+        newPassword.any { it.isLowerCase() },
+        newPassword.any { it.isDigit() },
+        newPassword.any { "~!$#%@^&*()_+-=[]{}|;':\",./<>?".contains(it) }
+    ).count { it }
+    val isCharTypeValid: Boolean get() = charTypeCount >= 2
+    val isPasswordValid: Boolean get() = isLengthValid && isCharTypeValid
+    val isConfirmMatch: Boolean get() = newPassword == confirmPassword && confirmPassword.isNotBlank()
+    val canSubmit: Boolean get() = isPasswordValid && isConfirmMatch && !isLoading
+}
+
+sealed class ResetPasswordState {
+    data object Idle : ResetPasswordState()
+    data object Loading : ResetPasswordState()
+    data object Success : ResetPasswordState()
+    data class Error(val messageResId: Int) : ResetPasswordState()
+}
+
+sealed class ResetPasswordEffect {
+    data object NavigateToEmailLogin : ResetPasswordEffect()
+    data class ShowToast(val messageResId: Int) : ResetPasswordEffect()
+}
+```
+
+**ViewModel（带参路由）：**
+```kotlin
+class ResetPasswordViewModel(
+    private val authRepository: AuthRepository,
+    savedStateHandle: SavedStateHandle
+) : ViewModel() {
+    private val resetToken: String = savedStateHandle.toRoute<ResetPassword>().resetToken
+
+    fun onSubmitClick() {
+        val state = _uiState.value
+        if (!state.isPasswordValid) {
+            _uiState.update { it.copy(newPasswordError = ResourceR.string.reset_password_error_rule) }
+            return
+        }
+        if (!state.isConfirmMatch) {
+            _uiState.update { it.copy(confirmPasswordError = ResourceR.string.reset_password_error_mismatch) }
+            return
+        }
+        viewModelScope.launch {
+            authRepository.resetPassword(resetToken, state.newPassword).collect { result ->
+                when (result) {
+                    is ApiResult.Loading -> _uiState.update { it.copy(isLoading = true, resetPasswordState = ResetPasswordState.Loading) }
+                    is ApiResult.Success -> {
+                        _uiState.update { it.copy(isLoading = false, resetPasswordState = ResetPasswordState.Success) }
+                        _effect.send(ResetPasswordEffect.ShowToast(ResourceR.string.reset_password_success))
+                        _effect.send(ResetPasswordEffect.NavigateToEmailLogin)
+                    }
+                    is ApiResult.Error -> _uiState.update {
+                        it.copy(isLoading = false, resetPasswordState = ResetPasswordState.Error(getErrorMessageRes(result.code)))
+                    }
+                }
+            }
+        }
+    }
 }
 ```

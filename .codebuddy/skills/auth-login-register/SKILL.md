@@ -48,6 +48,7 @@ description: This skill should be used when the user needs to implement, modify,
 - `_uiState`：`MutableStateFlow`；`_effect`：`Channel<NewPageEffect>()`
 - 邮箱过滤：`.trim()`，验证码：`.filter { c -> c.isDigit() }.take(6)`
 - 手机号过滤：`.filter { c -> c.isDigit() }.take(15)`；区号弹窗状态通过 `isAreaCodeDialogVisible` 控制
+- 找回密码页：邮箱/手机号验证共用同一 ViewModel，通过 `verifyType: ForgotPasswordVerifyType` 区分；邮箱和手机号各有独立的倒计时字段（`isEmailCountingDown`/`isPhoneCountingDown`）
 - `sendCode` 成功后调用 `startCountdown()`
 - 提交请求通过 `authRepository.xxx()` → `safeApiCall` → 在 `Success` 分支 `send(effect)`
 - 错误码映射到字符串资源 ID（-1=超时，-2/-3=网络，500-599=服务器）
@@ -103,8 +104,8 @@ NavHost(nav, startDestination = Splash) {
     registerVerifyEmailScreen() // 注册第一步：输入邮箱 + 验证码
     registerSetPasswordScreen() // 注册第二步：设置密码（注册完成）
     welcomeScreen()             // 注册完成欢迎页（设置 / 跳过 → Main）
-    forgotPasswordScreen()
-    resetPasswordScreen()
+    forgotPasswordScreen()      // 找回密码（页内 Tab 切换：邮箱验证 / 手机号验证）
+    resetPasswordScreen()       // 重置密码（接收 resetToken，成功后回邮箱登录）
     newPageScreen()   // 追加
 }
 ```
@@ -122,21 +123,24 @@ NavHost(nav, startDestination = Splash) {
 
 ## 强制规范（违反将导致编译或运行时错误）
 
-| 场景 | 正确做法 | 禁止 |
-|---|---|---|
-| 订阅 StateFlow | `collectAsStateWithLifecycle()` | `collectAsState()` |
-| 颜色 | `LocalAppColors.current.xxx` | `Color(0xFF...)` 硬编码 |
-| 字体 | `MaterialTheme.typography.xxx` | 硬编码 `fontSize` / `fontWeight` |
-| 路由定义 | `Screen.kt` 中 `@Serializable` | 字符串路由 `"login"` |
-| 获取 NavController | `LocalNavController.current` | 函数参数透传 |
-| 导航 | 加 `launchSingleTop = true` | 不加（快速点击重复进栈） |
-| 登录后跳主页 | `popUpTo(Guide) { inclusive = true }` | 不清栈（返回键回到引导页） |
-| 注册完成跳主页 | WelcomeScreen 两按钮均 `popUpTo(Guide) { inclusive = true }` | 不清栈（返回键回注册页） |
-| 手机号登录后跳主页 | `popUpTo(Guide) { inclusive = true }`（同邮箱登录规则） | 不清栈 |
-| ViewModel 持有导航 | 通过 `UiEffect` → UI 层执行 | ViewModel 持有 NavController |
-| 网络异常 | `safeApiCall` 统一处理 | ViewModel `try-catch` |
-| DI 获取 Repository | `AuthRepositoryProvider.get()` | 业务层 `new AuthRepositoryImpl()` |
-| 错误消息 | `@StringRes Int`（资源 ID） | 直接传字符串 |
+| 场景                            | 正确做法                                                                                            | 禁止                             |
+|-------------------------------|-------------------------------------------------------------------------------------------------|--------------------------------|
+| 订阅 StateFlow                  | `collectAsStateWithLifecycle()`                                                                 | `collectAsState()`             |
+| 颜色                            | `LocalAppColors.current.xxx`                                                                    | `Color(0xFF...)` 硬编码           |
+| 字体                            | `MaterialTheme.typography.xxx`                                                                  | 硬编码 `fontSize` / `fontWeight`  |
+| 路由定义                          | `Screen.kt` 中 `@Serializable`                                                                   | 字符串路由 `"login"`                |
+| 获取 NavController              | `LocalNavController.current`                                                                    | 函数参数透传                         |
+| 导航                            | 加 `launchSingleTop = true`                                                                      | 不加（快速点击重复进栈）                   |
+| 登录后跳主页                        | `popUpTo(Guide) { inclusive = true }`                                                           | 不清栈（返回键回到引导页）                  |
+| 注册完成跳主页                       | WelcomeScreen 两按钮均 `popUpTo(Guide) { inclusive = true }`                                        | 不清栈（返回键回注册页）                   |
+| 手机号登录后跳主页                     | `popUpTo(Guide) { inclusive = true }`（同邮箱登录规则）                                                  | 不清栈                            |
+| 找回密码验证成功跳重置密码                 | `navigate(ResetPassword(resetToken)) { launchSingleTop = true }`                                | 不传 resetToken（服务端凭证）           |
+| 重置密码成功回登录页                    | `navigate(EmailLogin) { popUpTo(ForgotPassword) { inclusive = true }; launchSingleTop = true }` | 不清栈（返回键回找回密码页）                 |
+| ForgotPasswordViewModel 发送验证码 | 邮箱/手机号共用同一 ViewModel，通过 `verifyType` 区分调用接口                                                     | 拆成两个 ViewModel                 |
+| ViewModel 持有导航                | 通过 `UiEffect` → UI 层执行                                                                          | ViewModel 持有 NavController     |
+| 网络异常                          | `safeApiCall` 统一处理                                                                              | ViewModel `try-catch`          |
+| DI 获取 Repository              | `AuthRepositoryProvider.get()`                                                                  | 业务层 `new AuthRepositoryImpl()` |
+| 错误消息                          | `@StringRes Int`（资源 ID）                                                                         | 直接传字符串                         |
 
 ---
 
