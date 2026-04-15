@@ -1,139 +1,139 @@
 ---
 description: Android DataStore 封装规范，定义 Preferences DataStore 的封装模板、Key 管理、Hilt 注入及禁止事项，所有业务模块必须遵守
-alwaysApply: true
+alwaysApply: false
 enabled: true
 ---
 
-# DataStore 封装规范（base 模块）
+# Android DataStore 核心开发规范 (MAD Architecture)
 
-DataStore 统一封装在 `base/datastore/`，**禁止** UI 层或 ViewModel 直接操作，**禁止**使用已废弃的 `SharedPreferences`。
+本规范定义了在现代 Android 开发中如何正确、高性能、类型安全地使用 DataStore。作为资深架构师，我们坚持 **单向数据流 (UDF)** 和 **响应式编程** 原则，拒绝过度设计，追求极高的可测试性。
 
-```
-datastore/
-├── AppPreferences.kt       # Preferences DataStore 封装
-├── AppPreferencesKeys.kt   # Key 常量集中管理
-└── room/                   # Room 封装，详见 room.md
+---
+
+## 一、依赖配置
+
+```toml
+# libs.versions.toml
+[versions]
+datastore = "1.1.1"
+kotlinxSerialization = "1.6.3"
+protobuf = "3.25.1"
+protobufPlugin = "0.9.4"
+
+[libraries]
+# Preferences DataStore (简单键值对)
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+
+# Proto DataStore (强类型，核心依赖)
+androidx-datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
+androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "datastore" }
+
+# Kotlin Serialization (推荐用于 JSON 格式存储)
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+
+# Protobuf (推荐用于二进制格式存储)
+protobuf-javalite = { group = "com.google.protobuf", name = "protobuf-javalite", version.ref = "protobuf" }
+protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version.ref = "protobuf" }
 ```
 
 ---
 
-## 一、选型原则
+## 二、核心技术规范
 
-| 场景                  | 方案                      |
-|---------------------|-------------------------|
-| 简单键值对（Token、主题、语言等） | `Preferences DataStore` |
-| 复杂结构体、强类型           | `Proto DataStore`       |
-| 关系型数据、多表            | Room                    |
+### 选型标准
+- **不再使用 SharedPreferences**：禁止在任何新功能中使用 SP。
+- **Proto DataStore 优先**：对于复杂数据结构、强类型需求和多模块项目，**必须**使用 Proto DataStore (基于 Protocol Buffers)。
+- **Preferences DataStore 仅限简单场景**：仅在简单的 Key-Value (如：`is_first_launch`) 且不需要 Schema 安全的情况下使用。
+
+### 并发与作用域
+- **单例模式**：DataStore 实例必须在 `AppScope` 下作为单例存在（推荐通过 Hilt 注入）。
+- **非阻塞式 I/O**：所有读写操作必须在 `Dispatchers.IO` 中执行。
+- **流式暴露**：数据必须以 `Flow<T>` 形式暴露，严禁在 UI 层同步等待结果。
 
 ---
 
-## 二、Key 管理
+## 三、约束与原则
 
-所有 Key 集中定义在 `AppPreferencesKeys.kt`，**禁止**在业务模块中散落定义。
+### 类型安全 (Type Safety)
+- 必须通过 Kotlin Serialization 或 Protobuf 定义数据模型。
+- 禁止在 Repository 层以外暴露 DataStore 的 `Edit` 键值。
+
+### 响应式原则 (Reactive)
+- **只读流**：ViewModel 只能观察数据流，不能持有本地状态副本，除非是为了 UI 转换。
+- **原子性操作**：所有写操作必须使用 `edit` 或 `updateData` 块，确保事务性。
+
+### 异常处理
+- 必须处理 `IOException`（通常由磁盘故障引起）。
+- 在 `dataStore.data.catch` 中捕获异常，并发送默认值或处理错误状态。
+
+---
+
+## 四、Agent 工作流 (代码生成规范)
+
+在生成 DataStore 相关代码时，AI Agent 必须遵循以下步骤：
+
+1.  **定义 Schema**：编写 `.proto` 文件或 `@Serializable` 数据类。
+2.  **创建 Serializer**：实现 `Serializer<T>` 接口，包含默认值定义。
+3.  **Hilt 模块注入**：在 `DataModule` 中定义 `DataStore<T>` 提供者，指定文件名。
+4.  **Repository 封装**：
+    - 暴露 `val data: Flow<T>`。
+    - 提供针对特定字段更新的 `suspend fun updateXxx()` 方法。
+5.  **单元测试**：生成基于 `TestScope` 和临时文件的单元测试代码。
+
+---
+
+## 五、常见指令参考 (Best Practices)
+
+### 定义 Proto DataStore (推荐)
 
 ```kotlin
-object AppPreferencesKeys {
-    val ACCESS_TOKEN    = stringPreferencesKey("access_token")
-    val REFRESH_TOKEN   = stringPreferencesKey("refresh_token")
-    val IS_LOGGED_IN    = booleanPreferencesKey("is_logged_in")
-    val APP_THEME       = stringPreferencesKey("app_theme")      // "light"|"dark"|"system"
-    val APP_LANGUAGE    = stringPreferencesKey("app_language")
-}
-```
+// 1. 定义数据结构
+@Serializable
+data class UserSettings(
+    val theme: Theme = Theme.SYSTEM,
+    val useDynamicColors: Boolean = true
+)
 
----
-
-## 三、AppPreferences 封装
-
-```kotlin
-private val Context.dataStore by preferencesDataStore(name = "app_preferences")
-
-@Singleton
-class AppPreferences @Inject constructor(@ApplicationContext context: Context) {
-
-    private val dataStore = context.dataStore
-
-    fun <T> observe(key: Preferences.Key<T>, default: T): Flow<T> =
-        dataStore.data
-            .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
-            .map { it[key] ?: default }
-
-    suspend fun <T> get(key: Preferences.Key<T>, default: T): T =
-        observe(key, default).first()
-
-    suspend fun <T> put(key: Preferences.Key<T>, value: T) =
-        dataStore.edit { it[key] = value }
-
-    suspend fun <T> remove(key: Preferences.Key<T>) =
-        dataStore.edit { it.remove(key) }
-
-    // 语义化属性
-    val isLoggedIn: Flow<Boolean> = observe(AppPreferencesKeys.IS_LOGGED_IN, false)
-    val appTheme: Flow<String>    = observe(AppPreferencesKeys.APP_THEME, "system")
-
-    suspend fun saveTokens(access: String, refresh: String) = dataStore.edit {
-        it[AppPreferencesKeys.ACCESS_TOKEN]  = access
-        it[AppPreferencesKeys.REFRESH_TOKEN] = refresh
-        it[AppPreferencesKeys.IS_LOGGED_IN]  = true
+// 2. 实现 Serializer
+object UserSettingsSerializer : Serializer<UserSettings> {
+    override val defaultValue: UserSettings = UserSettings()
+    override suspend fun readFrom(input: InputStream): UserSettings {
+        return try {
+            Json.decodeFromString(UserSettings.serializer(), input.readBytes().decodeToString())
+        } catch (e: SerializationException) {
+            defaultValue
+        }
     }
+    override suspend fun writeTo(t: UserSettings, output: OutputStream) {
+        output.write(Json.encodeToString(UserSettings.serializer(), t).encodeToByteArray())
+    }
+}
+```
 
-    suspend fun clearSession() = dataStore.edit {
-        it.remove(AppPreferencesKeys.ACCESS_TOKEN)
-        it.remove(AppPreferencesKeys.REFRESH_TOKEN)
-        it[AppPreferencesKeys.IS_LOGGED_IN] = false
+### Repository 实现模式
+
+```kotlin
+class SettingsRepository @Inject constructor(
+    private val userSettingsStore: DataStore<UserSettings>
+) {
+    // 高性能流式读取
+    val settings: Flow<UserSettings> = userSettingsStore.data
+        .catch { exception ->
+            if (exception is IOException) emit(UserSettings()) else throw exception
+        }
+
+    // 类型安全的写操作
+    suspend fun updateTheme(newTheme: Theme) {
+        userSettingsStore.updateData { current ->
+            current.copy(theme = newTheme)
+        }
     }
 }
 ```
 
 ---
 
-## 四、Repository 层集成
-
-涉及认证/会话**必须**通过 Repository 封装，ViewModel 不直接依赖 `AppPreferences`。
-
-```kotlin
-interface SessionRepository {
-    val isLoggedIn: Flow<Boolean>
-    suspend fun saveTokens(access: String, refresh: String)
-    suspend fun clearSession()
-}
-
-class SessionRepositoryImpl @Inject constructor(
-    private val prefs: AppPreferences
-) : SessionRepository {
-    override val isLoggedIn = prefs.isLoggedIn
-    override suspend fun saveTokens(access: String, refresh: String) = prefs.saveTokens(access, refresh)
-    override suspend fun clearSession() = prefs.clearSession()
-}
-
-@Module @InstallIn(SingletonComponent::class)
-abstract class SessionModule {
-    @Binds @Singleton
-    abstract fun bindSession(impl: SessionRepositoryImpl): SessionRepository
-}
-```
-
----
-
-## 五、ViewModel 使用
-
-```kotlin
-@HiltViewModel
-class SettingsViewModel @Inject constructor(private val session: SessionRepository) : ViewModel() {
-    val isLoggedIn = session.isLoggedIn
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-}
-```
-
----
-
-## 六、禁止事项
-
-| 禁止行为                                    | 原因           |
-|-----------------------------------------|--------------|
-| UI / ViewModel 直接访问 `context.dataStore` | 破坏分层         |
-| 使用 `SharedPreferences`                  | 已废弃，线程不安全    |
-| 业务模块分散定义 Key                            | Key 冲突，难以管理  |
-| 读取不加 `.catch { IOException }`           | 文件损坏时崩溃      |
-| 退出登录不调用 `clearSession()`                | 敏感数据残留       |
-| DataStore 存储单条超 1 KB 对象                 | 性能差，应改用 Room |
+## 六、性能与测试约束
+1. **禁止在 init 块中调用 DataStore**：避免阻塞主线程初始化。
+2. **禁止过度使用 map**：如果 UI 只需要一个字段，在 ViewModel 中进行 distinctUntilChanged() 过滤，减少无效刷新。
+3. **单元测试**：必须使用 Job 或 TestScope 确保测试完成后清理 DataStore 临时文件。
