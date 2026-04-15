@@ -134,6 +134,8 @@ class SettingsRepository @Inject constructor(
 ---
 
 ## 六、性能与测试约束
+
 1. **禁止在 init 块中调用 DataStore**：避免阻塞主线程初始化。
 2. **禁止过度使用 map**：如果 UI 只需要一个字段，在 ViewModel 中进行 distinctUntilChanged() 过滤，减少无效刷新。
 3. **单元测试**：必须使用 Job 或 TestScope 确保测试完成后清理 DataStore 临时文件。
+4. **严禁阻塞式读取**：禁止使用 runBlocking 调用 DataStore。 DataStore 依赖于协程，同步读取会导致 UI 卡顿甚至 ANR。请始终使用 collect 或转换为 StateFlow
