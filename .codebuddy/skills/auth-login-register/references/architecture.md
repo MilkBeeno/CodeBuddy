@@ -1,5 +1,9 @@
 # 认证模块架构规范
 
+# 设计稿地址
+
+设计稿地址 Figma-MCP-Server：https://www.figma.com/design/HzJDwENzzrItN8SyQZwpbU/V6.2.20?node-id=105-6631&m=dev
+
 ## 包结构
 
 ```
