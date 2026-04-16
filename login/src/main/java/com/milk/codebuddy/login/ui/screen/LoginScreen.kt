@@ -31,7 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.milk.codebuddy.base.ui.theme.AppTheme
 import com.milk.codebuddy.base.ui.theme.LocalAppColors
 import com.milk.codebuddy.base.ui.theme.LocalTypography
@@ -52,7 +52,7 @@ import com.milk.codebuddy.resource.R
  */
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel = viewModel(),
+    viewModel: LoginViewModel = hiltViewModel(),
     onNavigateToMain: () -> Unit,
     onNavigateToRegister: () -> Unit = {},
     onNavigateToForgotPassword: () -> Unit = {},

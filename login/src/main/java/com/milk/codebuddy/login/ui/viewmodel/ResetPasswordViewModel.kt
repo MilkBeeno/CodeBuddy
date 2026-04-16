@@ -11,6 +11,7 @@ import com.milk.codebuddy.login.ui.state.ResetPasswordEffect
 import com.milk.codebuddy.login.ui.state.ResetPasswordState
 import com.milk.codebuddy.login.ui.state.ResetPasswordUiState
 import com.milk.codebuddy.resource.R as ResourceR
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,17 +19,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * 重置密码 ViewModel（MVI 架构）
  *
- * - 依赖通过构造器注入，由 [AuthViewModelFactory] 提供
+ * - 依赖通过 Hilt 注入
  * - 通过 [SavedStateHandle] 获取导航传入的 phone 参数，无需持有 Application / Context
  *
- * @param authRepository 认证仓库，统一处理网络请求
+ * @param authRepository  认证仓库，统一处理网络请求
  * @param savedStateHandle 导航参数持有者，从 [ResetPassword] 路由中提取 phone
  */
-class ResetPasswordViewModel(
+@HiltViewModel
+class ResetPasswordViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {

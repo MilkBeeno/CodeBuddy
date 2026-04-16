@@ -11,6 +11,7 @@ import com.milk.codebuddy.login.ui.state.RegisterEffect
 import com.milk.codebuddy.login.ui.state.RegisterState
 import com.milk.codebuddy.login.ui.state.RegisterUiState
 import com.milk.codebuddy.resource.R as ResourceR
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,13 +19,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * 注册 ViewModel（MVI 架构）
  *
- * - 依赖通过构造器注入，由 [AuthViewModelFactory] 提供
+ * - 依赖通过 Hilt 注入
  */
-class RegisterViewModel(
+@HiltViewModel
+class RegisterViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 

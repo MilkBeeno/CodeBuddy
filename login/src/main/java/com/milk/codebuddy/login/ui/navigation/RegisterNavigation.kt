@@ -2,14 +2,12 @@ package com.milk.codebuddy.login.ui.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.milk.codebuddy.base.ui.navigation.LocalNavController
 import com.milk.codebuddy.base.ui.navigation.Register
-import com.milk.codebuddy.login.data.repository.AuthRepositoryProvider
 import com.milk.codebuddy.login.ui.screen.RegisterScreen
-import com.milk.codebuddy.login.ui.viewmodel.AuthViewModelFactory
 import com.milk.codebuddy.login.ui.viewmodel.RegisterViewModel
 
 /**
@@ -23,9 +21,8 @@ import com.milk.codebuddy.login.ui.viewmodel.RegisterViewModel
 fun NavGraphBuilder.registerScreen() {
     composable<Register> {
         val controller = LocalNavController.current
-        val factory = AuthViewModelFactory(AuthRepositoryProvider.get())
         RegisterScreen(
-            viewModel = viewModel<RegisterViewModel>(factory = factory),
+            viewModel = hiltViewModel<RegisterViewModel>(),
             modifier = Modifier.fillMaxSize(),
             onNavigateToLogin = {
                 controller.popBackStack()

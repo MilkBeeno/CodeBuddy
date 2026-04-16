@@ -6,11 +6,14 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.IOException
+import javax.inject.Inject
+import javax.inject.Singleton
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "app_preferences")
 
@@ -24,7 +27,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
  *
  * 使用示例（Repository）：
  * ```kotlin
- * class SessionRepositoryImpl(private val prefs: AppPreferences) {
+ * class SessionRepositoryImpl @Inject constructor(private val prefs: AppPreferences) {
  *     val isLoggedIn: Flow<Boolean> = prefs.isLoggedIn
  *
  *     suspend fun saveTokens(access: String, refresh: String) =
@@ -32,7 +35,8 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
  * }
  * ```
  */
-class AppPreferences(context: Context) {
+@Singleton
+class AppPreferences @Inject constructor(@ApplicationContext context: Context) {
 
     private val dataStore = context.applicationContext.dataStore
 

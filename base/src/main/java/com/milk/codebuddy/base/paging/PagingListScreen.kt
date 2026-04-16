@@ -118,7 +118,7 @@ fun <T : Any> PagingListScreen(
 
                 // 追加加载状态
                 item {
-                    when (val appendState = items.loadState.append) {
+                    when (items.loadState.append) {
                         is LoadState.Loading -> appendLoadingContent()
                         is LoadState.Error   -> appendErrorContent { items.retry() }
                         else                 -> Unit

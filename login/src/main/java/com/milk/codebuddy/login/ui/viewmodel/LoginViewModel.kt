@@ -11,6 +11,7 @@ import com.milk.codebuddy.login.ui.state.LoginEffect
 import com.milk.codebuddy.login.ui.state.LoginState
 import com.milk.codebuddy.login.ui.state.LoginUiState
 import com.milk.codebuddy.resource.R as ResourceR
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,15 +19,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * 登录 ViewModel（MVI 架构）
  *
- * - 依赖通过构造器注入，由 [AuthViewModelFactory] 提供
+ * - 依赖通过 Hilt 注入
  * - 单向数据流：UI 发出 Intent → ViewModel 更新 [uiState] → UI 响应渲染
  * - 单次事件：导航/Toast 通过 [effect] Channel（replay=0）发送，防止重复消费
  */
-class LoginViewModel(
+@HiltViewModel
+class LoginViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 

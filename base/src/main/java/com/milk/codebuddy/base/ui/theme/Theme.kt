@@ -1,12 +1,11 @@
 package com.milk.codebuddy.base.ui.theme
 
 import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
@@ -54,17 +53,13 @@ fun AppTheme(
 
     val view = LocalView.current
     if (!view.isInEditMode) {
-        val window = (view.context as Activity).window
-
-        // 设置状态栏背景色（使用 WindowInsetsControllerCompat）
-        window.statusBarColor = appColors.primaryBackgroundColor.toArgb()
-
-        // 根据主题设置状态栏图标颜色
-        val insetsController = WindowCompat.getInsetsController(window, view)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            // 让内容延伸到系统栏区域，由 WindowInsets 自行处理内边距
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            // 根据主题调整状态栏和导航栏图标颜色
+            val insetsController = WindowCompat.getInsetsController(window, view)
             insetsController.isAppearanceLightStatusBars = !darkTheme
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             insetsController.isAppearanceLightNavigationBars = !darkTheme
         }
     }

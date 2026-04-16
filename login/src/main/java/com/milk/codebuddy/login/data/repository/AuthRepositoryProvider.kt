@@ -1,64 +1,60 @@
 package com.milk.codebuddy.login.data.repository
 
-import android.content.Context
 import com.milk.codebuddy.base.datastore.AppPreferences
 import com.milk.codebuddy.base.network.RetrofitFactory
 import com.milk.codebuddy.login.data.local.SessionManager
 import com.milk.codebuddy.login.data.remote.LoginApi
-import kotlinx.coroutines.flow.first
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
+import javax.inject.Singleton
 
 /**
- * 认证仓库单例提供者
+ * 认证模块 Hilt 依赖注入模块
  *
- * 在引入 Hilt 之前用于跨 Navigation 扩展函数统一共享 [AuthRepository] 实例。
- * 必须在应用启动时（如 Application.onCreate 或 MainActivity.onCreate）调用 [init] 完成初始化，
- * 之后通过 [get] 获取实例。
+ * 提供 [SessionManager]、[LoginApi]、[AuthRepository] 的单例。
  *
- * 使用示例（Application/MainActivity 初始化）：
+ * 配置方式：在 Application 所在模块的 Hilt 组件中自动生效，
+ * 无需手动调用初始化方法。
+ *
+ * 注入示例（ViewModel）：
  * ```kotlin
- * AuthRepositoryProvider.init(context, baseUrl = "https://api.example.com/", isDebug = BuildConfig.DEBUG)
- * ```
- *
- * 使用示例（Navigation 层获取）：
- * ```kotlin
- * val factory = AuthViewModelFactory(AuthRepositoryProvider.get())
- * val vm = viewModel<LoginViewModel>(factory = factory)
+ * @HiltViewModel
+ * class LoginViewModel @Inject constructor(
+ *     private val authRepository: AuthRepository
+ * ) : ViewModel()
  * ```
  */
-object AuthRepositoryProvider {
+@Module
+@InstallIn(SingletonComponent::class)
+object AuthModule {
 
-    @Volatile
-    private var instance: AuthRepository? = null
+    @Provides
+    @Singleton
+    fun provideSessionManager(prefs: AppPreferences): SessionManager = SessionManager(prefs)
 
-    /**
-     * 初始化认证仓库，应在应用启动时调用一次。
-     *
-     * @param context  Application Context
-     * @param baseUrl  服务器基础地址
-     * @param isDebug  是否开启网络日志
-     */
-    fun init(context: Context, baseUrl: String, isDebug: Boolean) {
-        if (instance != null) return
-        synchronized(this) {
-            if (instance != null) return
-            val prefs = AppPreferences(context.applicationContext)
-            val sessionManager = SessionManager(prefs)
-            val loginApi = RetrofitFactory(
-                baseUrl = baseUrl,
-                isDebug = isDebug,
-                tokenProvider = { runBlocking { sessionManager.userSession.first().accessToken } },
-                tokenRefresher = { null },
-                onTokenExpired = {}
-            ).createService<LoginApi>()
-            instance = AuthRepositoryImpl(loginApi, sessionManager)
-        }
+    @Provides
+    @Singleton
+    fun provideLoginApi(sessionManager: SessionManager): LoginApi {
+        return RetrofitFactory(
+            baseUrl = "https://api.example.com/",     // TODO: 替换为 BuildConfig.BASE_URL
+            isDebug = false,                          // TODO: 替换为 BuildConfig.DEBUG
+            appVersion = "1.0",                       // TODO: 替换为 BuildConfig.VERSION_NAME
+            tokenProvider = {
+                runBlocking { sessionManager.userSession.firstOrNull()?.accessToken }
+            },
+            tokenRefresher = { null },
+            onTokenExpired = {}
+        ).createService()
     }
 
-    /**
-     * 获取 [AuthRepository] 单例，必须在 [init] 之后调用。
-     */
-    fun get(): AuthRepository = requireNotNull(instance) {
-        "AuthRepositoryProvider 未初始化，请先调用 init()"
-    }
+    @Provides
+    @Singleton
+    fun provideAuthRepository(
+        loginApi: LoginApi,
+        sessionManager: SessionManager
+    ): AuthRepository = AuthRepositoryImpl(loginApi, sessionManager)
 }

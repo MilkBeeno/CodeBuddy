@@ -8,12 +8,18 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.milk.codebuddy.base.datastore.room.converter.CommonConverters
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 /**
  * 全局 Room 数据库单例
  *
  * 规范：
- * - 禁止业务模块自行调用 `Room.databaseBuilder`，统一通过此类访问
+ * - 禁止业务模块自行调用 `Room.databaseBuilder`，统一通过 Hilt 注入访问
  * - 新增 Entity 时同步更新 `entities` 数组并递增 `version`，补充对应 Migration
  * - 线上版本禁止使用 `fallbackToDestructiveMigration()`，必须编写 Migration
  *
@@ -22,7 +28,7 @@ import com.milk.codebuddy.base.datastore.room.converter.CommonConverters
  * 2. 递增 `version`
  * 3. 在 `companion object` 中添加对应 `MIGRATION_x_y`
  * 4. 在 `addMigrations(...)` 中注册
- * 5. 添加对应 DAO 抽象方法
+ * 5. 添加对应 DAO 抽象方法，并在 [DatabaseModule] 中暴露
  *
  * Migration 示例：
  * ```kotlin
@@ -43,7 +49,7 @@ internal data class PlaceholderEntity(
 @Database(
     entities = [PlaceholderEntity::class],
     version = 1,
-    exportSchema = false
+    exportSchema = true
 )
 @TypeConverters(CommonConverters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -54,7 +60,7 @@ abstract class AppDatabase : RoomDatabase() {
         const val NAME = "app_database"
 
         /**
-         * 创建数据库实例（仅供 DI 框架调用，业务代码禁止直接调用）
+         * 创建数据库实例（仅供 [DatabaseModule] 调用，业务代码禁止直接调用）
          *
          * @param context ApplicationContext
          */
@@ -64,4 +70,19 @@ abstract class AppDatabase : RoomDatabase() {
                 // 线上版本在此注册 Migration：.addMigrations(MIGRATION_1_2)
                 .build()
     }
+}
+
+/**
+ * Hilt 数据库模块，提供 [AppDatabase] 单例及各 DAO 实例。
+ *
+ * 新增 DAO 时，在此模块追加对应 `@Provides` 方法。
+ */
+@Module
+@InstallIn(SingletonComponent::class)
+object DatabaseModule {
+
+    @Provides
+    @Singleton
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
+        AppDatabase.create(context)
 }

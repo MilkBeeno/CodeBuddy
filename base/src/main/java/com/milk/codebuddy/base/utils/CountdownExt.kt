@@ -11,12 +11,12 @@ import kotlinx.coroutines.flow.flowOn
  * 创建一个从 [totalSeconds] 倒计时到 0 的冷流，每秒 emit 一次剩余秒数。
  *
  * @param totalSeconds 倒计时总秒数，默认 60
- * @return 依次 emit [totalSeconds-1, totalSeconds-2, …, 0] 的 Flow，异常静默处理
+ * @return 依次 emit [totalSeconds, totalSeconds-1, …, 1] 的 Flow，异常静默处理
  *
  * 使用示例（ViewModel 层）：
  * ```kotlin
  * viewModelScope.launch {
- *     _uiState.update { it.copy(isCountingDown = true, countdownSeconds = 60) }
+ *     _uiState.update { it.copy(isCountingDown = true, countdownSeconds = DEFAULT_COUNTDOWN_SECONDS) }
  *     countdownFlow().collect { remaining ->
  *         _uiState.update { it.copy(countdownSeconds = remaining) }
  *     }
@@ -24,34 +24,32 @@ import kotlinx.coroutines.flow.flowOn
  * }
  * ```
  */
-fun countdownFlow(totalSeconds: Int = 60): Flow<Int> = flow {
-    repeat(totalSeconds) { elapsed ->
-        emit(totalSeconds - elapsed - 1)
+fun countdownFlow(totalSeconds: Int = DEFAULT_COUNTDOWN_SECONDS): Flow<Int> = flow {
+    for (remaining in totalSeconds downTo 1) {
+        emit(remaining)
         delay(1000L)
     }
+    emit(0)
 }
     .flowOn(Dispatchers.Default)
     .catch { /* 倒计时异常静默处理 */ }
 
 // ── 校验工具 ────────────────────────────────────────────────────────────────
 
+/** 中国大陆手机号正则（1开头，第二位3-9，共11位），缓存为顶层常量避免重复编译 */
+private val PHONE_REGEX = Regex("^1[3-9]\\d{9}$")
+
 /**
- * 中国大陆手机号正则（1开头，第二位3-9，共11位）
+ * 校验是否为合法中国大陆手机号
  *
  * 使用示例：
  * ```kotlin
  * if (!phone.isValidPhone()) { showPhoneError() }
  * ```
- */
-private const val PHONE_REGEX = "^1[3-9]\\d{9}$"
-
-/**
- * 校验是否为合法中国大陆手机号
  *
  * @return true 表示格式合法
  */
-fun String.isValidPhone(): Boolean =
-    isNotEmpty() && PHONE_REGEX.toRegex().matches(this)
+fun String.isValidPhone(): Boolean = isNotEmpty() && PHONE_REGEX.matches(this)
 
 // ── 业务常量 ─────────────────────────────────────────────────────────────────
 

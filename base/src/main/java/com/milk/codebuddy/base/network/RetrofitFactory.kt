@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit
  *
  * @param baseUrl        服务器基础地址，建议从 BuildConfig 注入
  * @param isDebug        是否为调试模式，控制日志拦截器开关
+ * @param appVersion     App 版本名，从 BuildConfig.VERSION_NAME 注入
  * @param tokenProvider  动态获取当前 Token 的 Lambda
  * @param tokenRefresher 同步刷新 Token 的 Lambda，失败返回 null
  * @param onTokenExpired Token 失效时的全局回调（如触发退出登录）
@@ -34,6 +35,7 @@ import java.util.concurrent.TimeUnit
 class RetrofitFactory(
     private val baseUrl: String,
     private val isDebug: Boolean,
+    private val appVersion: String,
     private val tokenProvider: () -> String?,
     private val tokenRefresher: () -> String?,
     private val onTokenExpired: () -> Unit
@@ -50,7 +52,7 @@ class RetrofitFactory(
             .readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .writeTimeout(WRITE_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .retryOnConnectionFailure(true)
-            .addInterceptor(HeaderInterceptor(tokenProvider, APP_VERSION))
+            .addInterceptor(HeaderInterceptor(tokenProvider, appVersion))
             .addInterceptor(AuthInterceptor(tokenRefresher, onTokenExpired))
             .addInterceptor(LoggingInterceptor(isDebug))
             .build()
@@ -68,10 +70,9 @@ class RetrofitFactory(
     inline fun <reified T> createService(): T = retrofit.create(T::class.java)
 
     companion object {
-        private const val CONNECT_TIMEOUT_SECONDS = 15L
-        private const val READ_TIMEOUT_SECONDS = 30L
-        private const val WRITE_TIMEOUT_SECONDS = 30L
-        private const val APP_VERSION = "1.0.0"
+        const val CONNECT_TIMEOUT_SECONDS = 20L
+        const val READ_TIMEOUT_SECONDS = 30L
+        const val WRITE_TIMEOUT_SECONDS = 30L
     }
 }
 
@@ -121,7 +122,14 @@ fun <T> safeApiCall(call: suspend () -> T): Flow<ApiResult<T>> = flow {
     emit(error)
 }.flowOn(Dispatchers.IO)
 
-private const val ERROR_CODE_TIMEOUT = -1
-private const val ERROR_CODE_NO_NETWORK = -2
-private const val ERROR_CODE_IO = -3
-private const val ERROR_CODE_UNKNOWN = -99
+/** 请求超时错误码 */
+const val ERROR_CODE_TIMEOUT = -1
+
+/** 无网络错误码 */
+const val ERROR_CODE_NO_NETWORK = -2
+
+/** IO 异常错误码 */
+const val ERROR_CODE_IO = -3
+
+/** 未知错误码 */
+const val ERROR_CODE_UNKNOWN = -99
